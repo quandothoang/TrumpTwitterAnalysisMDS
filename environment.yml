@@ -12,3 +12,4 @@ dependencies:
   - matplotlib=3.10.8
   - vadersentiment=3.3.2
   - nltk=3.9.2
+  - seaborn=0.13.2
