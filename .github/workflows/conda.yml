@@ -16,11 +16,10 @@ jobs:
         uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
-          use-mamba: true
       
       - name: Install conda-lock
         shell: bash -l {0}
-        run: mamba install -c conda-forge conda-lock -y
+        run: conda install -c conda-forge conda-lock -y
       
       - name: Generate lockfiles
         shell: bash -l {0}
