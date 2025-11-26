@@ -30,7 +30,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: quandothoang/TrumpTwitterAnalysisMDS
+          images: quandothoang/dsci522-dockerfile-practice
           tags: |
             type=raw, value={{sha}},enable=${{github.ref_type != 'tag' }}
             type=raw, value=latest
@@ -47,7 +47,7 @@ jobs:
       - name: Update docker-compose.yml with new image tag
         if: success()
         run: |
-          sed -i "s|image:  quandothoang/TrumpTwitterAnalysisMDS:.*|image:  quandothoang/TrumpTwitterAnalysisMDS:${{ steps.meta.outputs.version }}|" docker-compose.yml
+          sed -i "s|image:  quandothoang/dsci522-dockerfile-practice:.*|image:  quandothoang/dsci522-dockerfile-practice:${{ steps.meta.outputs.version }}|" docker-compose.yml
 
       - name: Commit and push updated docker-compose.yml
         if: success()
