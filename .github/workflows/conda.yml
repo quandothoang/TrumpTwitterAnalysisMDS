@@ -1,4 +1,4 @@
-name: conda-lock
+name: conda-lock # Guidance and ideas contributed by Claude
 
 on:
   push:
@@ -23,7 +23,7 @@ jobs:
       - name: Generate lockfile
         run: conda-lock -f environment.yml -p linux-64 -p osx-64
 
-      # Optional: commit changes to repo
+      
       - name: Commit lockfile
         if: github.ref == 'refs/heads/main'
         run: |
