@@ -16,7 +16,6 @@ jobs:
         uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
-          activate-environment: base
           use-mamba: true
       
       - name: Install conda-lock
