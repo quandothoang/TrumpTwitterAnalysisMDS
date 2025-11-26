@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v3
@@ -21,15 +23,19 @@ jobs:
         shell: bash -l {0}
         run: conda install -c conda-forge conda-lock -y
       
-      - name: Generate lockfiles
+      - name: Generate explicit lockfiles
         shell: bash -l {0}
         run: conda-lock -f environment.yml -p linux-64 -p osx-arm64 -k explicit
+      
+      - name: Generate unified lockfile
+        shell: bash -l {0}
+        run: conda-lock -f environment.yml -p linux-64 -p osx-arm64
       
       - name: Commit lockfiles
         if: github.ref == 'refs/heads/main'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add conda-linux-64.lock conda-osx-arm64.lock
+          git add conda-linux-64.lock conda-osx-arm64.lock conda-lock.yml
           git commit -m "Update conda lockfiles [skip ci]" || echo "No changes to commit"
           git push
