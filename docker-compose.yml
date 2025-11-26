@@ -1,0 +1,12 @@
+services: 
+  jupyter-notebook:
+    image:  quandothoang/dsci522-dockerfile-practice:64e44d5
+    ports:
+      - "8888:8888"
+    volumes:
+      - .:/home/jovyan
+    deploy:
+      resources:
+        limits:
+          memory: 5G
+    platform: linux/amd64
