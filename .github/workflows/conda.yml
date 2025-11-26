@@ -29,7 +29,7 @@ jobs:
       
       - name: Generate unified lockfile
         shell: bash -l {0}
-        run: conda-lock -f environment.yml -p linux-64 -p osx-arm64
+        run: conda-lock -f environment.yml -p linux-64 -p osx-arm64 -p osx-64 -p win-64
       
       - name: Commit lockfiles
         if: github.ref == 'refs/heads/main'
