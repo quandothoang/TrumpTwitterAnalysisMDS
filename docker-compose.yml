@@ -4,7 +4,7 @@ services:
     ports:
       - "8787:8888"
     volumes:
-      - .:/home/jovyan
+      - .:/home/jovyan/work
     deploy:
       resources:
         limits:
