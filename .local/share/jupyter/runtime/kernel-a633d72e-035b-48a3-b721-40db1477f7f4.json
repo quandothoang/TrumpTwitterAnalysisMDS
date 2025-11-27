@@ -1,0 +1,13 @@
+{
+  "shell_port": 60275,
+  "iopub_port": 48863,
+  "stdin_port": 41567,
+  "control_port": 48745,
+  "hb_port": 58371,
+  "ip": "127.0.0.1",
+  "key": "46235dd8-824a093da41df633e270f162",
+  "transport": "tcp",
+  "signature_scheme": "hmac-sha256",
+  "kernel_name": "python3",
+  "jupyter_session": "/home/jovyan/trump_tweet_data_analysis.ipynb"
+}
