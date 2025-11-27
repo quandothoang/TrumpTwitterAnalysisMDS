@@ -7,4 +7,5 @@ RUN conda clean --all -y -f
 RUN fix-permissions "${CONDA_DIR}"
 RUN fix-permissions "/home/${NB_USER}"
 
+RUN pip install --no-cache-dir deepchecks==0.18.1
 
