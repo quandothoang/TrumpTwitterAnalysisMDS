@@ -7641,7 +7641,7 @@ Before our analysis, we believed that the frequency of tweets would be highest d
 
 <span class="n">tweets</span> <span class="o">=</span> <span class="n">load_clean_trump_csv</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
 
-<span class="n">tweets</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">tweets</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>                         <span class="c1"># strip white-space from before column names </span>
+<span class="n">tweets</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">tweets</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>                                <span class="c1"># strip white-space from before column names </span>
 <span class="c1">#print(tweets.columns)</span>
 <span class="n">tweets</span><span class="p">[</span><span class="s2">"Date &amp; Time"</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">tweets</span><span class="p">[</span><span class="s2">"Time"</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"coerce"</span><span class="p">)</span>     <span class="c1"># set Time column to DateTime and rename</span>
 <span class="n">tweets</span> <span class="o">=</span> <span class="n">tweets</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">"ID"</span><span class="p">,</span> <span class="s2">"Tweet URL"</span><span class="p">,</span> <span class="s2">"Time"</span><span class="p">])</span>                     <span class="c1"># drop ID =&gt; twitter-handle, Tweet URL, Time =&gt; now "Date &amp; Time"</span>
@@ -7744,6 +7744,17 @@ Before our analysis, we believed that the frequency of tweets would be highest d
 </table>
 </div>
 </div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a76a6e72-c3ef-4dfa-b9fc-2c88468b0629">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p><b> DATA VALIDATION: Panderas </b></p>
 </div>
 </div>
 </div>
@@ -9223,6 +9234,17 @@ Figure 8e: Word cloud of the negative tweets <br/></p>
 </div>
 </div>
 </div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=615cbafc-6bf1-48eb-b2e9-801d42ef5b28">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p><b> ~DATA VALIDATION 2: Sentiment Analysis </b></p>
+</div>
+</div>
+</div>
+</div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=35a221e9-eaaa-4972-b179-32fb6ad72f5b">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -9312,6 +9334,17 @@ Name: proportion, dtype: float64
 <p>Figure 9a: Graph with the distribution of sentiment labels <br/>
 Figure 9b: Proportion of sentiment labels values <br/>
 Figure 9c: Graph with the distribution of sentiment labels over time <br/></p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=4b91a283-766a-4194-bd9a-50afc92dc9df">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p><b>~ DATA VALIDATION 3: Correlation </b></p>
 </div>
 </div>
 </div>
