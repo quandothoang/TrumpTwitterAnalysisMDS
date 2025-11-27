@@ -27,6 +27,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
@@ -55,16 +56,28 @@ jobs:
       - name: Update docker-compose.yml with new image tag
         if: success()
         run: |
-          NEW_TAG=$(echo "${{ steps.meta.outputs.tags }}" | grep -oP 'main-\w+' | head -1)
-          if [ -n "$NEW_TAG" ]; then
-            sed -i "s|image:  quandothoang/dsci522-dockerfile-practice:.*|image:  quandothoang/dsci522-dockerfile-practice:$NEW_TAG|" docker-compose.yml
+          # Extract the SHA tag (not 'latest')
+          SHA_TAG=$(echo "${{ steps.meta.outputs.tags }}" | grep -v 'latest' | awk -F':' '{print $NF}' | head -1)
+          echo "Extracted SHA tag: $SHA_TAG"
+          
+          if [ -n "$SHA_TAG" ]; then
+            sed -i "s|image:.*dsci522-dockerfile-practice:.*|image: quandothoang/dsci522-dockerfile-practice:$SHA_TAG|" docker-compose.yml
+            echo "Updated docker-compose.yml with tag: $SHA_TAG"
+          else
+            echo "No SHA tag found, skipping update"
           fi
           
       - name: Commit and push updated docker-compose.yml
         if: success()
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add docker-compose.yml
-          git commit -m "Update docker-compose.yml with new image tag [skip ci]" || echo "No changes to commit"
-          git push
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          if git diff --quiet docker-compose.yml; then
+            echo "No changes to docker-compose.yml"
+          else
+            git add docker-compose.yml
+            git commit -m "Update docker-compose.yml with new image tag [skip ci]"
+            git push
+            echo "Pushed updated docker-compose.yml"
+          fi
