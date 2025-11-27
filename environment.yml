@@ -14,5 +14,3 @@ dependencies:
   - nltk=3.9.2
   - seaborn=0.13.2
   - pandera=0.26.1
-  - pip:
-    - deepchecks==0.18.1
