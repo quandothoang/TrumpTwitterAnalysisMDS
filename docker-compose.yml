@@ -1,6 +1,6 @@
 services: 
   jupyter-notebook:
-    image:  quandothoang/dsci522-dockerfile-practice:64e44d5
+    image:  quandothoang/dsci522-dockerfile-practice:2003232
     ports:
       - "8888:8888"
     volumes:
