@@ -7,5 +7,5 @@ RUN conda clean --all -y -f
 RUN fix-permissions "${CONDA_DIR}"
 RUN fix-permissions "/home/${NB_USER}"
 
-RUN pip install --no-cache-dir deepchecks==0.18.1
-
+RUN python -m pip install deepchecks==0.18.1 \
+    && python -m pip install --upgrade 'ipython>=8.0,<9.0'
