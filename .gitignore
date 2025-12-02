@@ -4,3 +4,4 @@ conda-osx-arm64.lock
 conda-win-64.lock
 conda-linux-64.lock
 conda-linux-aarch64.lock
+.ipynb_checkpoints/
