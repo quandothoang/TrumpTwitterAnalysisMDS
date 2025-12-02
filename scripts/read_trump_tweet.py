@@ -1,45 +1,61 @@
-import pandas as pd
+# author: Group 14 - Mailys Guedon, Quan Hoang, Joel Peterson, Li Pu
+# date: 2025-12-02
+
+"""Downloads the Trump tweets dataset from URL and saves to data/raw folder. Bug fixing credited to Claude Opus 4.5
+
+This script ensures reproducibility by:
+1. Downloading data programmatically from the source URL (in case the URL is changed)
+2. Saving an exact copy to data/raw/ for archival purposes
+3. The saved copy ensures analysis remains reproducible even if URL becomes unavailable
+
+Usage: download_data.py --url=<url> --write_to=<write_to>
+
+Options:
+--url=<url>             URL to the raw CSV file
+--write_to=<write_to>   Path (including filename) to save the CSV file
+"""
 
 
-def load_clean_trump_csv(url):                # chatGPT assistance to construct this data-cleaning function from URL
-    resp = requests.get(url)                   # download the csv text from passed URL
-    resp.raise_for_status()                     # raise if 4xx/5xx
-    lines = resp.text.splitlines()
+import click
+import os
+import sys
 
-    rows = []
-
-    for i, line in enumerate(lines, start=1):
-        line = line.rstrip("\n\r")
-        if not line.strip():
-            continue                                   # skip empty lines
-
-        parts = line.split(",")
-
-        if i == 1:                                        # skip header row => define custom column names later
-            continue
-
-        if len(parts) < 4:                                  # if fewer than 4 parts => it's truly broken => drop
-            continue
-
-        id_val = parts[0].strip()                              # the first 3 columns don't need cleaning
-        time_val = parts[1].strip()
-        url_val = parts[2].strip()
-        tweet_text = ",".join(parts[3:]).strip()
-
-        rows.append((id_val, time_val, url_val, tweet_text))
-
-    df = pd.DataFrame(rows, columns=["ID", "Time", "Tweet URL", "Tweet Text"])
-    return df
+from src.data_utils import download_and_parse_csv
 
 
-url = "https://raw.githubusercontent.com/MarkHershey/CompleteTrumpTweetsArchive/refs/heads/master/data/realDonaldTrump_in_office.csv"
+@click.command()
+@click.option('--url', type=str, required=True, help='URL to the raw CSV file')
+@click.option('--write_to', type=str, required=True, help='Path to save the CSV file')
+def main(url: str, write_to: str):
+    """
+    Download Trump tweets data from URL and save to data/raw folder.
 
-tweets = load_clean_trump_csv(url)
+    This ensures the analysis is fully reproducible - the data is downloaded
+    programmatically and saved locally, so even if the source URL becomes
+    unavailable, the exact data used in the analysis is preserved.
+    """
 
-tweets.columns = tweets.columns.str.strip()                                # strip white-space from before column names
-#print(tweets.columns)
-tweets["Date & Time"] = pd.to_datetime(tweets["Time"], errors="coerce")     # set Time column to DateTime and rename
-tweets = tweets.drop(columns=["ID", "Tweet URL", "Time"])                     # drop ID => twitter-handle, Tweet URL, Time => now "Date & Time"
+    # Create output directory if it doesn't exist
+    output_dir = os.path.dirname(write_to)
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
+        print(f"Output directory: {output_dir}")
 
-print(tweets.shape)
-tweets.head(10)
+    # Download and parse data from URL
+    print("." * 60)
+    print("DOWNLOADING DATA FROM URL")
+    tweets = download_and_parse_csv(url)
+
+    print(f"\nParsed {tweets.shape[0]} tweets")
+    print(f"Date range: {tweets['Date & Time'].min()} to {tweets['Date & Time'].max()}")
+
+    # Save to data/raw folder
+    print("=" * 60)
+    print("SAVING DATA TO LOCAL FILE")
+    tweets.to_csv(write_to, index=False)
+    print(f"Data saved to: {write_to}")
+
+
+
+if __name__ == "__main__":
+    main()
