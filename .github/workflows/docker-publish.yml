@@ -61,7 +61,7 @@ jobs:
           echo "Extracted SHA tag: $SHA_TAG"
           
           if [ -n "$SHA_TAG" ]; then
-            sed -i "s|image:.*dsci522-dockerfile-practice:.*|image: quandothoang/dsci522-dockerfile-practice:$SHA_TAG|" docker-compose.yml
+            sed -i "s|image:.*trump-twitter-analysis:.*|image: quandothoang/trump-twitter-analysis:$SHA_TAG|" docker-compose.yml
             echo "Updated docker-compose.yml with tag: $SHA_TAG"
           else
             echo "No SHA tag found, skipping update"
