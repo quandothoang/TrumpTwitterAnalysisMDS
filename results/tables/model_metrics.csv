@@ -1,0 +1,2 @@
+accuracy,model_type,n_features
+0.9981908638625057,LogisticRegression,4411
