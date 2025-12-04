@@ -24,6 +24,13 @@ Example:
 Options:
     --read_from=<path>      Path to raw CSV file to clean
     --write_to=<path>      Path (including filename) to save cleaned CSV file
+
+This module provides functions to:
+- Download CSV data from URLs
+- Parse tweets with proper handling of commas in text
+- Create categorical and numerical features (time of day, season, etc.)
+- Validate data with Pandera schemas
+- Detect outliers using IQR method
 """
 
 import click
@@ -155,6 +162,201 @@ def clean_tweets(df):
     click.secho("Data validation passed\n", fg='blue', bold=True)   
     
     return df
+
+
+def detect_outliers_iqr(series: pd.Series, multiplier: float = 1.5):
+    """
+    Detect outliers using the IQR (Interquartile Range) method.
+    
+    Parameters
+    ----------
+    series : pd.Series
+        Numeric series to check for outliers
+    multiplier : float, default=1.5
+        IQR multiplier for bounds (1.5 is standard)
+        
+    Returns
+    -------
+    tuple
+        (outlier_mask, lower_bound, upper_bound, outlier_count)
+        
+    Examples
+    --------
+    >>> mask, lower, upper, count = detect_outliers_iqr(tweets["length"])
+    >>> print(f"Found {count} outliers outside [{lower}, {upper}]")
+    """
+    Q1 = series.quantile(0.25)
+    Q3 = series.quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - multiplier * IQR
+    upper_bound = Q3 + multiplier * IQR
+    
+    outlier_mask = (series < lower_bound) | (series > upper_bound)
+    outlier_count = outlier_mask.sum()
+    
+    return outlier_mask, lower_bound, upper_bound, outlier_count
+
+
+def season(date: pd.Timestamp):
+    """
+    This function returns the season based on the month.
+    
+    Parameters
+    ----------
+    date : pd.Timestamp
+        The date we want to find the season from.
+        
+    Returns
+    -------
+    str
+        Season: 'winter', 'spring', 'summer', or 'autumn'
+        
+    Examples
+    --------
+    >>> get_season(1)
+    'winter'
+    >>> get_season(7)
+    'summer'
+    """
+    if 4 <= date.month <=6:
+        return 'spring'
+    elif 7 <= date.month <=9:
+        return 'spring'
+    elif 10 <= date.month <=12:
+        return 'autumn'
+    else:
+        return 'winter'
+
+
+def daytime(date: pd.Timestamp):
+    """
+    This function returns the time of day based on the hour.
+    
+    Parameters
+    ----------
+    date : pd.Timestamp
+        The date we want to find the time of day from.
+        
+    Returns
+    -------
+    str
+        Time of day: 'overnight' (0-8), 'daytime' (8-16), or 'evening' (16-24)
+        
+    Examples
+    --------
+    >>> get_time_of_day(3)
+    'overnight'
+    >>> get_time_of_day(14)
+    'daytime'
+    >>> get_time_of_day(20)
+    'evening'
+    """
+    if pd.Timestamp('08:01').time() <= date.time() <= pd.Timestamp('16:00').time():
+        return 'daytime'
+    elif pd.Timestamp('16:01').time() <= date.time() <= pd.Timestamp('00:00').time():
+        return 'evening'
+    else:
+        return 'overnight'
+    
+def avg_word_length(text: str):
+    """
+    This function finds the average word length in a text. 
+    
+    Parameters
+    ----------
+    text : str
+        A text where each word is separated by spaces.
+        
+    Returns
+    -------
+    float
+        The average word length rounded to 1 decimal point.
+        
+    Examples
+    --------
+    >>> avg_word_length('Donald Trump first presidency began in January 2017, and ended in January 2021.')
+    5.2
+    """
+    average = 0
+    for word in text.split() :
+        average += len(word)
+    return round(average/len(text.split()),1)
+
+def punctuation_count(text):
+    """
+    This function finds the number of punctuation marks in the text. Here, punctuation marks are considered to be any non-numeric or whitespace character (this includes symbols like & or #).
+    
+    Parameters
+    ----------
+    text : str
+        A text.
+        
+    Returns
+    -------
+    int
+        The number of punctuation marks.
+        
+    Examples
+    --------
+    >>> punctuation_count('Donald Trump first presidency began in January 2017, and ended in January 2021.')
+    2
+    """
+    count = 0
+    for char in text:
+        if not char.isalnum() and not char.isspace():
+            count+=1
+    return count
+
+
+def create_features(tweets: pd.DataFrame):
+    """
+    This function creates categorical and numerical features from the existing features.
+    
+    Parameters
+    ----------
+    tweets : pd.DataFrame
+        DataFrame with Date & Time and Tweet Text columns.
+        
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with additional feature columns:
+        - length: character count of tweet
+        - hour, weekday, year, month, day: temporal components
+        - season: winter/spring/summer/autumn
+        - time_of_day: overnight/daytime/evening
+        - avg_word_length: average word length in tweet
+        - word_count: number of words
+        - punctuation_count: count of punctuation marks
+        
+    Examples
+    --------
+    >>> df = create_features(tweets)
+    >>> 'season' in df.columns
+    True
+    """
+    tweets = tweets.reset_index().copy()
+    
+    # Text features
+    tweets["length"] = tweets["Tweet Text"].str.len()
+    
+    # Temporal features
+    tweets["hour"] = tweets['Date & Time'].dt.hour
+    tweets["weekday"] = tweets['Date & Time'].dt.weekday
+    tweets["year"] = tweets['Date & Time'].dt.year
+    tweets["month"] = tweets['Date & Time'].dt.month
+    tweets["day"] = tweets['Date & Time'].dt.day
+    
+    # Derived temporal features
+    tweets["season"] = tweets["month"].apply(season)
+    tweets["time_of_day"] = tweets["hour"].apply(daytime)
+    
+    # Additional text features
+    tweets["avg_word_length"] = tweets["Tweet Text"].apply(avg_word_length) 
+    tweets["word_count"] = tweets["Tweet Text"].apply(lambda x:len(x.split()))
+    tweets["punctuation_count"] = tweets["Tweet Text"].apply(punctuation_count)
+    
+    return tweets
 
 
 @click.command()
