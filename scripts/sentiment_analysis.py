@@ -11,12 +11,13 @@ This script:
 3. Creates sentiment over time chart
 4. Saves sentiment-analyzed data and summary tables
 
-Usage:
-    python sentiment_vader_method1.py \
-        --processed_data data/processed/trump_tweets.csv \
-        --write_to data/processed/trump_tweets_with_sentiment.csv \
-        --plot_to results/figures \
-        --table_to results/tables
+Usage: python scripts/sentiment_analysis.py [OPTIONS]
+
+Options:
+    --processed_data    Path to processed CSV file (default: data/processed/trump_tweets_processed.csv)
+    --write_to          Path to save CSV with sentiment (default: data/processed/trump_tweets_with_sentiment.csv)
+    --plot_to           Directory to save charts (default: results/figures)
+    --table_to          Directory to save tables (default: results/tables)
 """
 
 import os
@@ -96,25 +97,29 @@ def create_sentiment_chart(sentiment_counts: pd.DataFrame) -> alt.Chart:
 @click.option(
     "--processed_data",
     type=str,
-    required=True,
+    required=False,
+    default="data/processed/trump_tweets_processed.csv",
     help="Path to processed CSV file containing a 'Tweet Text' column.",
 )
 @click.option(
     "--write_to",
     type=str,
-    required=True,
+    required=False,
+    default="data/processed/trump_tweets_with_sentiment.csv",
     help="Path to save CSV with sentiment_score and Sentiment columns.",
 )
 @click.option(
     "--plot_to",
     type=str,
-    required=True,
+    required=False,
+    default="results/figures",
     help="Directory to save sentiment bar chart PNG.",
 )
 @click.option(
     "--table_to",
     type=str,
-    required=True,
+    required=False,
+    default="results/tables",
     help="Directory to save sentiment counts table CSV.",
 )
 def main(processed_data: str, write_to: str, plot_to: str, table_to: str) -> None:
@@ -130,7 +135,7 @@ def main(processed_data: str, write_to: str, plot_to: str, table_to: str) -> Non
     print(f"Loaded {tweets.shape[0]} tweets")
 
     # 2–3. add sentiment columns
-    print("\nRunning VADER sentiment analysis (Method 1)...")
+    print("\nRunning VADER sentiment analysis...")
     tweets_with_sentiment = add_vader_sentiment(tweets)
 
     # 4. save tweets with sentiment
@@ -149,7 +154,7 @@ def main(processed_data: str, write_to: str, plot_to: str, table_to: str) -> Non
     sentiment_chart.save(plot_path, scale_factor=2)
     print(f"Saved sentiment chart to: {plot_path}")
 
-    print("\nSentiment analysis (Method 1) complete!")
+    print("\nSentiment analysis complete!")
 
 
 if __name__ == "__main__":
