@@ -47,3 +47,13 @@ To shut down the container, type `Ctrl` + `C` in the terminal where you launched
 ## License
 
 The project code in the repository is licensed under the MIT license. The Trump Tweet Analysis report is licensed under Creative Commons [Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0) license](https://creativecommons.org/licenses/by-nc-nd/4.0/) Any use of the work should be properly attributed, including the link to the webpage.
+
+## References
+
+Gottfried, J., Park, E., & Nolan, H. (n.d.). Americans’ Social Media Use 2025 Growing shares of U.S. adults say they are using Instagram, TikTok, WhatsApp and Reddit, but YouTube still rises to the top for media or other inquiries. Retrieved November 21, 2025, from <https://www.pewresearch.org/wp-content/uploads/sites/20/2025/11/PI_2025.11.20_Social-Media-Use_REPORT.pdf>
+
+McCarthy, N. (2021, January 11). Infographic: End Of The Road For Trump’s Twitter Account. Statista Daily Data; Statista. <https://www.statista.com/chart/19561/total-number-of-tweets-from-donald-trump/?srsltid=AfmBOorYyvrCIBJxWCwAxW5yYEl6cPXzdhu-oMfRfAPfoXrcdpIEA3fy>
+
+Mythili Sampathkumar. (2018, January 17). The tweets that have defined Donald Trump’s presidency \| The Independent. The Independent. <https://www.independent.co.uk/news/world/americas/us-politics/donald-trump-twitter-president-first-year-a8163791.html>
+
+Shear, M. D., Haberman, M., Confessore, N., Yourish, K., Buchanan, L., & Collins, K. (2019, November 2). How Trump Reshaped the Presidency in Over 11,000 Tweets. The New York Times. <https://www.nytimes.com/interactive/2019/11/02/us/politics/trump-twitter-presidency.html>
