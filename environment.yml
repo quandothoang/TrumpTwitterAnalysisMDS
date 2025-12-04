@@ -10,6 +10,7 @@ dependencies:
   - ipykernel=7.1.0
   - jupyterlab      
   - altair=6.0.0
+  - vl-convert-python=1.8.0
   - wordcloud=1.9.4
   - matplotlib=3.9.2
   - vadersentiment=3.3.2

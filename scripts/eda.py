@@ -8,12 +8,12 @@ This script:
 2. Creates seasonal frequency chart
 3. Saves summary tables
 
-Usage: eda.py --processed_data=<processed_data> --plot_to=<plot_to> --table_to=<table_to>
+Usage: python scripts/eda.py [OPTIONS]
 
 Options:
---processed_data=<processed_data>   Path to the processed CSV file
---plot_to=<plot_to>                 Directory to save figures
---table_to=<table_to>               Directory to save tables
+--processed_data    Path to processed CSV file (default: data/processed/trump_tweets_processed.csv)
+--plot_to           Directory to save figures (default: results/figures)
+--table_to          Directory to save tables (default: results/tables)
 """
 
 import click
@@ -28,35 +28,35 @@ from src.visualization_utils import create_time_of_day_chart, create_seasonal_ch
 
 
 @click.command()
-@click.option('--processed_data', type=str, required=False, default="../data/cleaned/realDonaldTrump_in_office_cleaned.csv",
-    help='Path to raw CSV file to clean')
-@click.option('--plot_to', type=str, required=False,  default="~/Documents/", help='Directory to save figures (default=Documents')
-@click.option('--table_to', type=str, required=False,  default="~/Documents/", help='Directory to save tables (default=Documents')
+@click.option('--processed_data', type=str, required=False, default="data/processed/trump_tweets_processed.csv",
+              help='Path to processed CSV file')
+@click.option('--plot_to', type=str, required=False, default="results/figures", help='Directory to save figures')
+@click.option('--table_to', type=str, required=False, default="results/tables", help='Directory to save tables')
 def main(processed_data: str, plot_to: str, table_to: str):
     """Generate EDA visualizations and summary tables."""
-    
+
     os.makedirs(plot_to, exist_ok=True)
     os.makedirs(table_to, exist_ok=True)
-    
+
     # Load data
     print(f"Loading data from: {processed_data}")
     tweets = pd.read_csv(processed_data, parse_dates=["Date & Time"], index_col="Date & Time")
     print(f"Loaded {tweets.shape[0]} tweets")
-    
+
     # Create time of day chart
     print("Creating time of day chart...")
     time_chart = create_time_of_day_chart(tweets)
     time_chart_path = os.path.join(plot_to, "tweet_frequency_time_of_day.png")
     time_chart.save(time_chart_path, scale_factor=2)
     print(f"Saved: {time_chart_path}")
-    
+
     # Create seasonal chart
     print("\nCreating seasonal chart...")
     season_chart = create_seasonal_chart(tweets)
     season_chart_path = os.path.join(plot_to, "tweet_frequency_season.png")
     season_chart.save(season_chart_path, scale_factor=2)
     print(f"Saved: {season_chart_path}")
-    
+
     # Create summary tables
     print("Creating summary tables...")
 
@@ -67,13 +67,13 @@ def main(processed_data: str, plot_to: str, table_to: str):
     time_df["Percentage"] = (time_df["Count"] / total * 100).round(1)
     time_df["Time Range"] = time_df["Time of Day"].map({
         "daytime": "8:01am – 4:00pm",
-        "evening": "4:01pm – 12:00am", 
+        "evening": "4:01pm – 12:00am",
         "overnight": "12:01am – 8:00am"
     })
     time_df = time_df[["Time of Day", "Time Range", "Count", "Percentage"]]
     time_df.to_csv(os.path.join(table_to, "time_of_day_summary.csv"), index=False)
     print(f"Saved: {os.path.join(table_to, 'time_of_day_summary.csv')}")
-    
+
     # Season summary
     season_df = tweets["season"].value_counts().reset_index()
     season_df.columns = ["Season", "Count"]
@@ -88,14 +88,14 @@ def main(processed_data: str, plot_to: str, table_to: str):
     season_df = season_df[["Season", "Date Range", "Count", "Percentage"]]
     season_df.to_csv(os.path.join(table_to, "season_summary.csv"), index=False)
     print(f"Saved: {os.path.join(table_to, 'season_summary.csv')}")
-    
+
     # Print summaries
-    print("TIME OF DAY SUMMARY")
+    print("\nTIME OF DAY SUMMARY")
     print(time_df.to_string(index=False))
-    
-    print("SEASONAL SUMMARY")
+
+    print("\nSEASONAL SUMMARY")
     print(season_df.to_string(index=False))
-    
+
     print("\nEDA complete!")
 
 
