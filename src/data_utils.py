@@ -1,8 +1,29 @@
 # author: Group 14 - Mailys Guedon, Quan Hoang, Joel Peterson, Li Pu
 # date: 2025-12-02
 
-"""
-Data utility functions for downloading, parsing, and preprocessing Trump tweets data.
+# code format guidance and debugging provided by Claude Sonnet 4.5
+
+"""Cleans the Trump tweets dataset from data/raw and saves to data/cleaned folder.
+
+This script:
+1. Reads raw CSV data from data/raw/
+2. Parses and cleans CSV formatting issues (commas in tweet text, malformed rows)
+3. Converts datetime columns to proper datetime format
+4. Removes duplicate rows
+5. Validates datatypes using Pandera schema
+6. Saves cleaned data to data/cleaned/
+
+Usage:
+    python clean_trump_tweets.py --read_from=<path> --write_to=<path>
+
+Example:
+    python clean_trump_tweets.py 
+        --read_from="../data/raw/realDonaldTrump_in_office.csv" 
+        --write_to="../data/cleaned/realDonaldTrump_in_office_cleaned.csv"
+
+Options:
+    --read_from=<path>      Path to raw CSV file to clean
+    --write_to=<path>      Path (including filename) to save cleaned CSV file
 
 This module provides functions to:
 - Download CSV data from URLs
@@ -12,198 +33,138 @@ This module provides functions to:
 - Detect outliers using IQR method
 """
 
+import click
 import pandas as pd
-import numpy as np
-import requests
-import pandera as pa
-from pandera import Column, Check, DataFrameSchema
+import pandera.pandas as pa
+from pandera.pandas import Column, DataFrameSchema
+from pathlib import Path
 
 
-def download_and_parse_csv(url: str) -> pd.DataFrame:
+def parse_raw_csv(file_path):
     """
-    Download Trump tweets CSV from URL and parse it.
+    Parses raw CSV data and handles common formatting issues.
     
-    The original CSV has commas within tweet text, so we handle this
-    by joining all fields after the first 3 columns as the tweet text.
+    This function handles cases where tweet text contains commas and other
+    malformed CSV rows specific to the Trump tweets dataset.
     
-    Parameters
-    ----------
-    url : str
-        URL to the raw CSV file
+    Parameters:
+    -----------
+    file_path : str
+        Path to the raw CSV file
         
-    Returns
-    -------
-    pd.DataFrame
-        Dataframe with columns: Tweet Text, Date & Time
-        
-    Examples
+    Returns:
     --------
-    >>> url = "https://raw.githubusercontent.com/.../realDonaldTrump_in_office.csv"
-    >>> df = download_and_parse_csv(url)
-    >>> df.columns.tolist()
-    ['Tweet Text', 'Date & Time']
+    pd.DataFrame
+        Parsed dataframe with columns: ID, Time, Tweet URL, Tweet Text
     """
-    print(f"Fetching data from URL: {url}")
-    resp = requests.get(url)
-    resp.raise_for_status()
-    print(f"Successfully downloaded {len(resp.content)} bytes")
+    # Read the raw file line by line
+    with open(file_path, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
     
-    lines = resp.text.splitlines()
     rows = []
-
+    
+    # Process each line with enumeration starting at 1
     for i, line in enumerate(lines, start=1):
+        # Remove trailing newline and carriage return characters
         line = line.rstrip("\n\r")
+        
+        # Skip completely empty lines (lines with only whitespace)
         if not line.strip():
             continue
-
+        
+        # Split the CSV line by commas into a list
         parts = line.split(",")
-
-        # Skip header row
+        
+        # Skip the header row (first row)
         if i == 1:
             continue
-
+        
+        # Skip malformed rows that have fewer than 4 columns
         if len(parts) < 4:
             continue
-
+        
+        # Extract individual columns and strip whitespace
         id_val = parts[0].strip()
         time_val = parts[1].strip()
         url_val = parts[2].strip()
-        # Handle commas in tweet text by joining remaining parts
+        
+        # Handle rows where tweet text contains commas
+        # Rejoin parts from index 3 onwards with commas to preserve original text
         tweet_text = ",".join(parts[3:]).strip()
-
+        
+        # Add this row as a tuple to the rows list
         rows.append((id_val, time_val, url_val, tweet_text))
-
-    df = pd.DataFrame(rows, columns=["ID", "Time", "Tweet URL", "Tweet Text"])
     
-    # Clean and convert to datetime
+    # Create DataFrame with proper column names
+    df = pd.DataFrame(rows, columns=["ID", "Time", "Tweet URL", "Tweet Text"])
+    return df
+
+
+def clean_tweets(df):
+    """
+    Cleans and transforms the tweets dataframe.
+    
+    Performs the following operations:
+    1. Strips whitespace from column names
+    2. Converts Time column to datetime format
+    3. Drops unnecessary columns (ID, Tweet URL, Time)
+    4. Removes duplicate rows
+    5. Validates data types using Pandera schema
+    
+    Parameters:
+    -----------
+    df : pd.DataFrame
+        Raw dataframe from parse_raw_csv()
+        
+    Returns:
+    --------
+    pd.DataFrame
+        Cleaned dataframe with validated datatypes
+        
+    Raises:
+    -------
+    pandera.errors.SchemaError
+        If dataframe fails schema validation
+    """
+    # Strip whitespace from all column names
     df.columns = df.columns.str.strip()
+    
+    # Convert Time column to datetime format
+    # errors='coerce' converts invalid dates to NaT (Not a Time)
     df["Date & Time"] = pd.to_datetime(df["Time"], errors="coerce")
+    
+    # Drop unnecessary columns, keeping only Tweet Text and Date & Time
     df = df.drop(columns=["ID", "Tweet URL", "Time"])
+    
+    # Remove completely duplicate rows
+    initial_rows = len(df)
+    df = df.drop_duplicates()
+    duplicates_removed = initial_rows - len(df)
+    
+    if duplicates_removed > 0:
+        click.secho(f"\n\nRemoved {duplicates_removed} duplicate rows", fg='blue', bold=True)
+    else:
+        click.secho("No duplicate rows found", fg='blue', bold=True)
+    
+    # Define schema for data validation
+    schema = DataFrameSchema(
+        {
+            "Date & Time": Column(pa.DateTime, nullable=False, coerce=True),
+            "Tweet Text": Column(pa.String, nullable=False),
+        },
+        checks=[pa.Check(lambda df: ~(df.isna().all(axis=1)).any(), error="Empty rows found.")]
+    )
+    
+    # Validate the dataframe against the schema
+    # This will raise an error if validation fails
+    df = schema.validate(df)
+
+    click.secho("Data validation passed\n", fg='blue', bold=True)   
     
     return df
 
 
-def get_raw_data_schema() -> DataFrameSchema:
-    """
-    Create a Pandera schema for validating raw tweet data.
-    
-    Returns
-    -------
-    pa.DataFrameSchema
-        Schema that validates:
-        - Date & Time: datetime64[ns], no nulls
-        - Tweet Text: string type, no nulls
-        - No completely empty rows
-        
-    Examples
-    --------
-    >>> schema = get_raw_data_schema()
-    >>> validated_df = schema.validate(raw_df)
-    """
-    schema = DataFrameSchema(
-        {
-            "Date & Time": Column(
-                pa.DateTime,
-                nullable=False,
-                coerce=True,
-                checks=[
-                    Check(lambda s: s.notna().all(), error="Date & Time contains null values")
-                ]
-            ),
-            "Tweet Text": Column(
-                str,
-                nullable=False,
-                checks=[
-                    Check(lambda s: s.str.len() > 0, error="Tweet Text contains empty strings")
-                ]
-            ),
-        },
-        checks=[
-            Check(lambda df: ~(df.isna().all(axis=1)).any(), error="Empty rows found.")
-        ],
-        strict=False,  # Allow additional columns
-        coerce=True
-    )
-    return schema
-
-
-def validate_data(tweets: pd.DataFrame) -> pd.DataFrame:
-    """
-    Validate tweet data using Pandera schema.
-    
-    Parameters
-    ----------
-    tweets : pd.DataFrame
-        DataFrame with 'Date & Time' and 'Tweet Text' columns
-        
-    Returns
-    -------
-    pd.DataFrame
-        Validated DataFrame
-        
-    Raises
-    ------
-    pandera.errors.SchemaError
-        If validation fails
-        
-    Examples
-    --------
-    >>> validated_df = validate_data(tweets)
-    >>> print("Validation passed!")
-    """
-    schema = get_raw_data_schema()
-    return schema.validate(tweets)
-
-
-def check_datetime_info(tweets: pd.DataFrame) -> None:
-    """
-    Check whether datetime exists as column or index and print info.
-    
-    Parameters
-    ----------
-    tweets : pd.DataFrame
-        DataFrame to check
-    """
-    if isinstance(tweets.index, pd.DatetimeIndex):
-        print("Datetime index detected — dates are correctly parsed as index.")
-    elif "Date & Time" in tweets.columns:
-        print("'Date & Time' column exists — first few values:")
-        print(tweets["Date & Time"].head())
-    else:
-        print("No datetime information found (neither column nor index).")
-
-
-def remove_duplicates(tweets: pd.DataFrame, subset: list = None) -> tuple:
-    """
-    Remove duplicate rows from DataFrame.
-    
-    Parameters
-    ----------
-    tweets : pd.DataFrame
-        DataFrame to deduplicate
-    subset : list, optional
-        Columns to consider for duplicates. If None, uses all columns.
-        
-    Returns
-    -------
-    tuple
-        (deduplicated DataFrame, number of duplicates removed)
-        
-    Examples
-    --------
-    >>> df_clean, n_removed = remove_duplicates(tweets, subset=["Tweet Text"])
-    >>> print(f"Removed {n_removed} duplicates")
-    """
-    original_count = len(tweets)
-    if subset:
-        tweets_clean = tweets.drop_duplicates(subset=subset)
-    else:
-        tweets_clean = tweets.drop_duplicates()
-    duplicates_removed = original_count - len(tweets_clean)
-    return tweets_clean, duplicates_removed
-
-
-def detect_outliers_iqr(series: pd.Series, multiplier: float = 1.5) -> tuple:
+def detect_outliers_iqr(series: pd.Series, multiplier: float = 1.5):
     """
     Detect outliers using the IQR (Interquartile Range) method.
     
@@ -396,3 +357,89 @@ def create_features(tweets: pd.DataFrame):
     tweets["punctuation_count"] = tweets["Tweet Text"].apply(punctuation_count)
     
     return tweets
+
+
+@click.command()
+@click.option(
+    '--read_from',
+    default="../data/raw/realDonaldTrump_in_office.csv",
+    help='Path to raw CSV file to clean',
+    type=str
+)
+@click.option(
+    '--write_to',
+    default="../data/cleaned/realDonaldTrump_in_office_cleaned.csv",
+    help='Path (including filename) to save cleaned CSV file',
+    type=str
+)
+def clean_raw_data(read_from, write_to):
+    """
+    Cleans raw Trump tweets data and saves to cleaned directory.
+    
+    Reads raw CSV from read_from path, applies cleaning and validation,
+    and saves the result to write_to path.
+    """
+    try:
+        click.echo("=" * 70)
+        click.echo("Trump Tweets Dataset - Data Cleaning Pipeline")
+        click.echo("=" * 70)
+        click.echo(f"Reading from: {read_from}")
+        click.echo(f"Writing to: {write_to}")
+        click.echo("=" * 70)
+        
+        # Parse raw CSV file 
+        click.echo("\nParsing raw CSV data...", nl=False)
+        df = parse_raw_csv(read_from)
+        click.secho(f"...Successfully loaded {len(df)} rows!",fg='magenta', bold=True)
+
+        # Clean and validate data 
+        click.echo("\nCleaning and validating data...", nl=False)
+        df = clean_tweets(df)
+        click.secho(f"...Final dataset: {len(df)} rows",fg='magenta', bold=True)
+        
+        # Create the output directory 
+        click.echo("\nCreating output directory structure...", nl=False)
+        output_path = Path(write_to)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        click.secho("...Directory created!",fg='magenta', bold=True)
+        
+        # Save the cleaned data to csv 
+        click.echo("\nSaving cleaned data to CSV...", nl=False)
+        df.to_csv(output_path, index=False)
+        click.secho("...File saved!",fg='magenta', bold=True)
+       
+        click.echo("\n" + "=" * 70)
+        click.secho("Data cleaning pipeline complete!", fg='green', bold=True)
+        click.echo(f"Saved to: {output_path.resolve()}")
+        click.echo("=" * 70)
+        
+        # Print summary statistics
+        click.secho("\nCleaned data summary:\n", fg='cyan', bold=True) 
+        click.secho("  Shape: ", fg='blue', bold=True, nl=False)
+        click.echo(f"{df.shape[0]} rows by {df.shape[1]} columns")
+        click.secho("  Columns: ", fg='blue', bold=True, nl=False)
+        click.echo(f"{', '.join(df.columns)}")
+        click.secho("  Date range: ", fg='blue', bold=True, nl=False)
+        click.echo(f"{df['Date & Time'].min()} to {df['Date & Time'].max()}")
+    
+        click.secho("\nAll tasks complete! Terminating script.\n", fg='cyan', bold=True)    
+        
+    except FileNotFoundError:
+        click.secho(f"!File not found: {read_from}", fg='red', bold=True)
+        raise click.Abort()
+    except pd.errors.ParserError as e:
+        click.secho(f"!CSV parsing error: {e}", fg='red', bold=True)
+        raise click.Abort()
+    except pa.errors.SchemaError as e:
+        click.secho(f"!Data validation failed: {e}", fg='red', bold=True)
+        raise click.Abort()
+    except IOError as e:
+        click.secho(f"!File I/O error: {e}", fg='red', bold=True)
+        raise click.Abort()
+    except Exception as e:
+        click.secho(f"!Unexpected error: {e}", fg='red', bold=True)
+        raise click.Abort()
+
+
+if __name__ == "__main__":
+    clean_raw_data()
