@@ -28,9 +28,10 @@ from src.visualization_utils import create_time_of_day_chart, create_seasonal_ch
 
 
 @click.command()
-@click.option('--processed_data', type=str, required=True, help='Path to processed CSV file')
-@click.option('--plot_to', type=str, required=True, help='Directory to save figures')
-@click.option('--table_to', type=str, required=True, help='Directory to save tables')
+@click.option('--processed_data', type=str, required=False, default="../data/cleaned/realDonaldTrump_in_office_cleaned.csv",
+    help='Path to raw CSV file to clean')
+@click.option('--plot_to', type=str, required=False,  default="~/Documents/", help='Directory to save figures (default=Documents')
+@click.option('--table_to', type=str, required=False,  default="~/Documents/", help='Directory to save tables (default=Documents')
 def main(processed_data: str, plot_to: str, table_to: str):
     """Generate EDA visualizations and summary tables."""
     
