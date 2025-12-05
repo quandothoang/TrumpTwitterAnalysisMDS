@@ -1,5 +1,52 @@
 ---
 title: Trump Twitter Analysis
+author : Group 14-Quan Hoang, Mailys Guedon, Joel Peterson, Li Pu 
+date: Sys.Date()
+format:
+    html:
+        toc: true
+        toc-depth: 2
+bibliography: references.bib
+execute:
+  echo: false
+  warning: false
+---
+
+
+```{python}
+import pandas as pd
+```
+```{python}
+time_day_summary = pd.read_csv('../results/tables/time_of_day_summary.csv')
+most_frequent_time = time_day_summary.loc[time_day_summary['Count'].idxmax(),'Time of Day']
+least_frequent_time = time_day_summary.loc[time_day_summary['Count'].idxmin(),'Time of Day']
+time_freq_increase =round((time_day_summary['Count'].max()-time_day_summary['Count'].min())/time_day_summary['Count'].min()*100,2)
+```
+```{python}
+season_summary = pd.read_csv('../results/tables/season_summary.csv')
+most_frequent_season = season_summary.loc[season_summary['Count'].idxmax(),'Season']
+least_frequent_season = season_summary.loc[season_summary['Count'].idxmin(),'Season']
+season_freq_increase =round((season_summary['Count'].max()-season_summary['Count'].min())/season_summary['Count'].min()*100,2)
+```
+```{python}
+sentiment_count = pd.read_csv('../results/tables/sentiment_counts.csv')
+positive_freq = round(sentiment_count.loc[0,'Count']/sentiment_count['Count'].sum()*100,2)
+negative_freq = round(sentiment_count.loc[2,'Count']/sentiment_count['Count'].sum()*100,2)
+```
+
+# Summary
+In this report we will be analyzing Tweets published by Donald Trump during his first presidency, focusing on two different aspects : frequency and sentiment. We started by considering how the time of day and season affects the frequency of the tweets. Our research reveals that there is a variation in the frequency depending on time of day and that there is a `{python} time_freq_increase`% increase in the number of tweets published from the `{python} least_frequent_time` to the `{python} most_frequent_time`. We also found that changing the season also had an impact on the frequency, with there being a `{python} season_freq_increase`% increase in the number of tweets from the season where he posts the least (`{python} least_frequent_season`) to the season where he posts the most (`{python} most_frequent_season`). Additionally, we performed sentiment analysis using the VADER lexicon to determine the frequency of positive, negative and neutral tweets. We found that around `{python} positive_freq`% of the tweets were classified as positive and `{python} negative_freq`% as negative. To better understand the sentiment of the tweets we also used a combination of CountVectorizer and Logistic Regression to determine the most frequently used words in the  positive and negative tweets. We found that the positive tweets most often contained words of praise and common phrases used by Trump, as well as his own name, while the negative tweets most often used words to refer to opposing political parties and leaders. 
+
+
+## Introduction
+Twitter (also known as X) is one of the world's most popular social media platforms, where users can share short messages (texts, videos, photos) known as tweets. In April 2025, the Pew Research Center did a study and found that on average active users published 157 tweets per month, which is around 5 tweets per day [@gottfried2025americans]. At the beginning of his first presidency, Donald Trump followed the average, posting about 5.7 times per day. However, towards the second half of 2020, his posting rate grew to around 34.8 times per day. On June 5 2020, he went as far as tweeting or retweeting 200 messages in a single day [@McCarthy_Richter_2021]. With so much data, we thought it would be interesting to consider what could affect his frequency of posting. The president uses the platform mostly to disparage those he perceives as threats (people, companies, countries...), with more than half of his tweets between January 2017 and October 2019 being used to attack something or someone [@shear2019trump]. Another interesting question to consider would be to determine the frequency of positive and negative tweets throughout his presidency. In this report, we will start by considering different factors (time of day or season) that might have an impact on the frequency of the tweets, then we will classify the tweets into positive, negative or neutral to determine the most frequent sentiment expressed in his posts.
+
+The dataset we are using contains all tweets published (includes deleted tweets) published by Donald Trump during his first presidency between 20 Jan 2017 and 08 Jan 2021. It contains 5 columns (ID, Time, Tweet URL, Tweet Text) and each row represents a tweet. The dataset can be found in this repository [CompleteTrumpTweetsArchive](https://github.com/MarkHershey/CompleteTrumpTweetsArchive?tab=readme-ov-file "CompleteTrumpTweetsArchive"), in the data folder, specifically the file [realDonaldTrump_in_office.csv](https://github.com/MarkHershey/CompleteTrumpTweetsArchive/blob/master/data/realDonaldTrump_in_office.csv "realDonaldTrump_in_office.csv").
+
+
+
+---
+title: Trump Twitter Analysis
 jupyter: python3
 ---
 
@@ -9,15 +56,11 @@ from https://github.com/MarkHershey/CompleteTrumpTweetsArchive/blob/master/data/
 
 
 # Summary
-In this report we will be analyzing Tweets published by Donald Trump during his first presidency, focusing on two different aspects : frequency and sentiment. We started by considering how the time of day and season affects the frequency of the tweets. Our research reveals that there is a variation in the frequency depending on time of day and that there is a 39% (!) increase in the number of tweets published from the daytime to the evening. We also found that changing the season also had an impact on the frequency, with there being a 54% (!) increase in the number of tweets from the season where he posts the least (winter) to the season where he posts the most. Additionally, we performed sentiment analysis using the VADER lexicon to determine the frequency of positive, negative and neutral tweets. We found that around 52%(!) of the tweets were classified as positive and 30% (!) as negative. To better understand the sentiment of the tweets we also used a combination of CountVectorizer and Logistic Regression to determine the most frequently used words in the  positive and negative tweets. We found that the positive tweets most often contained words of praise and common phrases used by Trump, as well as his own name, while the negative tweets most often used words to refer to opposing political parties and leaders. 
-
+Here we are analyzing Tweets published by Donald Trump during his first presidency, specifically how the time of day or season affect the frequency of the tweets. Additionally, we did sentiment analysis using a VADER for classification to determine the frequency of positive, negative and neutral tweets. Finally, using a combination of CountVectorizer and Logistic Regression, we used WorldCloud visualization to determine the most frequent positive and negative words.
 
 ## Introduction
-Twitter (also known as X) is one of the world's most popular social media platforms, where users can share short messages (texts, videos, photos) known as tweets. In April 2025, the Pew Research Center did a study and found that on average active users published 157 tweets per month, which is around 5 tweets per day. At the beginning of his first presidency, Donald Trump followed the average, posting about 5.7 times per day. However, towards the second half of 2020, his posting rate grew to around 34.8 times per day. On June 5 2020, he went as far as tweeting or retweeting 200 messages in a single day. With so much data, we thought it would be interesting to consider what could affect his frequency of posting. The president uses the platform mostly to disparage those he perceives as threats (people, companies, countries...), with more than half of his tweets between January 2017 and October 2019 being used to attack something or someone. Another interesting question to consider would be to determine the frequency of positive and negative tweets throughout his presidency. In this report, we will start by considering different factors (time of day or season) that might have an impact on the frequency of the tweets, then we will classify the tweets into positive, negative or neutral to determine the most frequent sentiment expressed in his posts.
-
-The dataset we are using contains all tweets published (includes deleted tweets) published by Donald Trump during his first presidency between 20 Jan 2017 and 08 Jan 2021. It contains 5 columns (ID, Time, Tweet URL, Tweet Text) and each row represents a tweet. The dataset can be found in this repository [CompleteTrumpTweetsArchive](https://github.com/MarkHershey/CompleteTrumpTweetsArchive?tab=readme-ov-file "CompleteTrumpTweetsArchive"), in the data folder, specifically the file [realDonaldTrump_in_office.csv](https://github.com/MarkHershey/CompleteTrumpTweetsArchive/blob/master/data/realDonaldTrump_in_office.csv "realDonaldTrump_in_office.csv").
-
-
+Twitter (also known as X) is one of the world's most popular social media platforms, where users can share short messages (texts, videos, photos) known as tweets.
+In April 2025, the Pew Research Center did a study and found that on average active users published 157 tweets per month, which is around 5 tweets per day. At the beginning of his first presidency, Donald Trump followed the average, posting about 5.7 times per day. However towards the second half of 2020, his posting rate grew to around 34.8 times per day. On June 5 2020, he went as far as tweeting or retweeting 200 messages in a single day. With so much data, we though it would be interesting to consider what could affect his frequency of posting. The president uses the platform mostly to disparage those he perceives as threats (people, companies, countries...), with more than half of his tweets between January 2017 and October 2019 being used to attack something or someone. Another intresting question to consider would be to determine the frequency of positive and negative tweets throughout his presidency. In this report, we will start by considering different  the factors (time of day or season) that might have an impact on the frequency of the tweets, then we will classify the tweets into positive, negative or neutral to determine the most frequent sentiment expressed in his posts. 
 
 ## Imports
 
@@ -756,8 +799,3 @@ if not check_feat_feat_corr_result.passed_conditions():
 Within this report we considered multiple aspects of the tweets. Firstly we determined that Donald Trump's most productive time and season for posting was overnight during the summer. Then we determined that, contrary to what we originally believed, most of his tweets are actually positively connotated. Now, as mentioned above, our sentiment classification methods might not be a faithful representation of the sentiment of the tweets, as the models do not consider intricacies (sarcasm, neutral tweets added to positive class) that can change the sentiment of the message. 
 
 ## References
-
-Gottfried, J., Park, E., & Nolan, H. (n.d.). Americans’ Social Media Use 2025 Growing shares of U.S. adults say they are using Instagram, TikTok, WhatsApp and Reddit, but YouTube still rises to the top FOR MEDIA OR OTHER INQUIRIES. Retrieved November 21, 2025, from [https://www.pewresearch.org/wp-content/uploads/sites/20/2025/11/PI_2025.11.20_Social-Media-Use_REPORT.pdf](https://www.pewresearch.org/wp-content/uploads/sites/20/2025/11/PI_2025.11.20_Social-Media-Use_REPORT.pdf) <br><br>
-McCarthy, N. (2021, January 11). Infographic: End Of The Road For Trump’s Twitter Account. Statista Daily Data; Statista. [https://www.statista.com/chart/19561/total-number-of-tweets-from-donald-trump/?srsltid=AfmBOorYyvrCIBJxWCwAxW5yYEl6cPXzdhu-oMfRfAPfoXrcdpIEA3fy](https://www.statista.com/chart/19561/total-number-of-tweets-from-donald-trump/?srsltid=AfmBOorYyvrCIBJxWCwAxW5yYEl6cPXzdhu-oMfRfAPfoXrcdpIEA3fy)<br><br>
-Mythili Sampathkumar. (2018, January 17). The tweets that have defined Donald Trump’s presidency | The Independent. The Independent. [https://www.independent.co.uk/news/world/americas/us-politics/donald-trump-twitter-president-first-year-a8163791.html](https://www.independent.co.uk/news/world/americas/us-politics/donald-trump-twitter-president-first-year-a8163791.html) <br><br>
-Shear, M. D., Haberman, M., Confessore, N., Yourish, K., Buchanan, L., & Collins, K. (2019, November 2). How Trump Reshaped the Presidency in Over 11,000 Tweets. The New York Times. [https://www.nytimes.com/interactive/2019/11/02/us/politics/trump-twitter-presidency.html](https://www.nytimes.com/interactive/2019/11/02/us/politics/trump-twitter-presidency.html) <br><br>
