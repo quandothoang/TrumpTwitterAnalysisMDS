@@ -2174,19 +2174,19 @@ vertical-align: -.125em;
   <li><a href="#method" id="toc-method" class="nav-link" data-scroll-target="#method">Method</a>
   <ul>
   <li><a href="#analysis" id="toc-analysis" class="nav-link" data-scroll-target="#analysis">Analysis</a></li>
+  </ul></li>
   <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a>
-  <ul class="collapse">
+  <ul>
   <li><a href="#part-i-does-the-time-of-day-or-season-affect-the-frequency-of-the-tweets" id="toc-part-i-does-the-time-of-day-or-season-affect-the-frequency-of-the-tweets" class="nav-link" data-scroll-target="#part-i-does-the-time-of-day-or-season-affect-the-frequency-of-the-tweets">Part I: Does the time of day or season affect the frequency of the tweets?</a></li>
   <li><a href="#part-ii-how-many-tweets-are-positive-vs-negative" id="toc-part-ii-how-many-tweets-are-positive-vs-negative" class="nav-link" data-scroll-target="#part-ii-how-many-tweets-are-positive-vs-negative">Part II: How many tweets are positive vs negative?</a>
   <ul class="collapse">
-  <li><a href="#classifying-the-tweets" id="toc-classifying-the-tweets" class="nav-link" data-scroll-target="#classifying-the-tweets">Classifying the tweets:</a></li>
+  <li><a href="#classifying-the-tweets" id="toc-classifying-the-tweets" class="nav-link" data-scroll-target="#classifying-the-tweets">Classifying the tweets</a></li>
   <li><a href="#analysing-the-words-in-each-tweet" id="toc-analysing-the-words-in-each-tweet" class="nav-link" data-scroll-target="#analysing-the-words-in-each-tweet">Analysing the words in each tweet</a></li>
   </ul></li>
-  <li><a href="#data-validation" id="toc-data-validation" class="nav-link" data-scroll-target="#data-validation">Data validation:</a>
+  <li><a href="#data-validation" id="toc-data-validation" class="nav-link" data-scroll-target="#data-validation">Data validation</a>
   <ul class="collapse">
-  <li><a href="#targetresponse-variable-follows-expected-distribution-validation" id="toc-targetresponse-variable-follows-expected-distribution-validation" class="nav-link" data-scroll-target="#targetresponse-variable-follows-expected-distribution-validation">Target/response variable follows expected distribution validation:</a></li>
-  <li><a href="#no-anomalous-correlations-between-targetresponse-variable-and-featuresexplanatory-variables-validation" id="toc-no-anomalous-correlations-between-targetresponse-variable-and-featuresexplanatory-variables-validation" class="nav-link" data-scroll-target="#no-anomalous-correlations-between-targetresponse-variable-and-featuresexplanatory-variables-validation">No anomalous correlations between target/response variable and features/explanatory variables validation:</a></li>
-  </ul></li>
+  <li><a href="#targetresponse-variable-follows-expected-distribution-validation" id="toc-targetresponse-variable-follows-expected-distribution-validation" class="nav-link" data-scroll-target="#targetresponse-variable-follows-expected-distribution-validation">Target/response variable follows expected distribution validation</a></li>
+  <li><a href="#no-anomalous-correlations-between-targetresponse-variable-and-featuresexplanatory-variables-validation" id="toc-no-anomalous-correlations-between-targetresponse-variable-and-featuresexplanatory-variables-validation" class="nav-link" data-scroll-target="#no-anomalous-correlations-between-targetresponse-variable-and-featuresexplanatory-variables-validation">No anomalous correlations between target/response variable and features/explanatory variables validation</a></li>
   </ul></li>
   <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion">Discussion</a></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
@@ -2236,10 +2236,11 @@ vertical-align: -.125em;
 <h2 class="anchored" data-anchor-id="analysis">Analysis</h2>
 <p>In the first part, we will be doing a visual analysis on the variation in tweet posting frequency between different times of day (daytime, evening, overnight), then between different seasons (winter, summer, autumn, spring). In the second part, we will use the VADER lexicon to classify the tweets into either positive, neutral or negative categories. With the tweets now classified into positive and negative (we will consider neutral tweets as positive), we will use a bag of words approach on the tweets (CountVectorizer) to train a logistic model. We will then extract the coefficients from the model to determine the top positive and negative words.</p>
 </section>
-<section id="results" class="level2">
-<h2 class="anchored" data-anchor-id="results">Results</h2>
-<section id="part-i-does-the-time-of-day-or-season-affect-the-frequency-of-the-tweets" class="level3">
-<h3 class="anchored" data-anchor-id="part-i-does-the-time-of-day-or-season-affect-the-frequency-of-the-tweets">Part I: Does the time of day or season affect the frequency of the tweets?</h3>
+</section>
+<section id="results" class="level1">
+<h1>Results</h1>
+<section id="part-i-does-the-time-of-day-or-season-affect-the-frequency-of-the-tweets" class="level2">
+<h2 class="anchored" data-anchor-id="part-i-does-the-time-of-day-or-season-affect-the-frequency-of-the-tweets">Part I: Does the time of day or season affect the frequency of the tweets?</h2>
 <p>With the president posting 34.8 times per day <span class="citation" data-cites="shear2019trump">(<a href="#ref-shear2019trump" role="doc-biblioref">Shear et al. 2019</a>)</span> it is interesting to consider whether the time of day or even the period of the year affects the frequency of his tweets. <br> Before our analysis, we believed that the frequency of tweets would be highest during the daytime and night-time. These assumptions were proven wrong as the numbers show that the most frequent time of day for tweets was the evening period.</p>
 <p>The initial data filtering by time of day shows that the highest frequency of tweets occurs during the evening period between 4:01pm – 12:00am (as mentioned above) with a total of 9592 analyzed tweets. The second most frequent tweet period occurred during the overnight period between 12:01am – 8:00am with a total of 8058 analyzed tweets, with the time of day resulting in the least frequent amount of tweets actually being the daytime period between 8:01am – 4:00pm with a total of 5415 analyzed tweets. Perhaps this is because Trump is most busy during the day (golfing?) and cannot tend to tweets.</p>
 <div class="cell" data-execution_count="5">
@@ -2249,7 +2250,7 @@ vertical-align: -.125em;
 Table 1: Number of tweets published by time of day (daytime: 8:01am–4:00pm, evening: 4:01pm–12:00am, overnight: 12:01am–8:00am).
 </figcaption>
 <div aria-describedby="tbl-time-of-day-counts-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="65">
+<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="5">
 <table class="do-not-create-environment cell caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
@@ -2293,7 +2294,7 @@ Table 1: Number of tweets published by time of day (daytime: 8:01am–4:00pm, e
 Table 2: Number of tweets published by season (Spring: Apr 1–Jun 30, Summer: Jul 1–Sep 30, Autumn: Oct 1–Dec 31, Winter: Jan 1–Mar 31).
 </figcaption>
 <div aria-describedby="tbl-season-counts-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="66">
+<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="6">
 <table class="do-not-create-environment cell caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
@@ -2358,11 +2359,11 @@ Figure 2: Trump’s Tweet Frequency by Season
 </div>
 <p>Now visually comparing the two, we see that time of day has a higher impact on the frequency than season does. Indeed, there is a 77.14% increase in the number of tweets published from the daytime to the evening, while changing the season from Winter to Summer only results in a 53.87% increase.</p>
 </section>
-<section id="part-ii-how-many-tweets-are-positive-vs-negative" class="level3">
-<h3 class="anchored" data-anchor-id="part-ii-how-many-tweets-are-positive-vs-negative">Part II: How many tweets are positive vs negative?</h3>
+<section id="part-ii-how-many-tweets-are-positive-vs-negative" class="level2">
+<h2 class="anchored" data-anchor-id="part-ii-how-many-tweets-are-positive-vs-negative">Part II: How many tweets are positive vs negative?</h2>
 <p>When we think of the tweets posted by the president, we tend to think mostly of those where he critices or attacks others. However, is this a real representation of the sentiments of his tweets? In this part we will begin by classify the tweets into positive, negative or neutral, then we will use those labels to analyse the words in the tweets for the positive and negative classes.</p>
-<section id="classifying-the-tweets" class="level4">
-<h4 class="anchored" data-anchor-id="classifying-the-tweets">Classifying the tweets:</h4>
+<section id="classifying-the-tweets" class="level3">
+<h3 class="anchored" data-anchor-id="classifying-the-tweets">Classifying the tweets</h3>
 <p>We use a simple sentiment analysis model (VADER) to classify each tweet as positive, negative, or neutral, and then compare the counts, this methodological inspiration is from ChatGPT.</p>
 <div class="cell" data-execution_count="7">
 <div id="tbl-sentiment-counts" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="7">
@@ -2371,7 +2372,7 @@ Figure 2: Trump’s Tweet Frequency by Season
 Table 3: Number of tweets per sentiment (negative, neutral, positive).
 </figcaption>
 <div aria-describedby="tbl-sentiment-counts-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="67">
+<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="7">
 <table class="do-not-create-environment cell caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
@@ -2412,8 +2413,8 @@ Figure 3: Number of tweets per sentiment (positive, neutral, negative).
 </div>
 <p>The actual context and literal meaning of the tweets was not analyzed, nor the accuracy of the classification at this point, so there is certainly going to be a margin of error and some ‘false positives’ etc as the positivity is quite often a self directed compliment of sorts.</p>
 </section>
-<section id="analysing-the-words-in-each-tweet" class="level4">
-<h4 class="anchored" data-anchor-id="analysing-the-words-in-each-tweet">Analysing the words in each tweet</h4>
+<section id="analysing-the-words-in-each-tweet" class="level3">
+<h3 class="anchored" data-anchor-id="analysing-the-words-in-each-tweet">Analysing the words in each tweet</h3>
 <p>Using a CountVectorizer and Logistic Regression, combining with a Wordcloud visualization to determine the most frequent words in the positive and negative tweets. Syntax and bug fixing credited to ChatGPT 5.1 <br></p>
 <p>The second classifier method used to analyze the tweets was utilizing the CountVectorizer() to classify sets as positive words, negative words and some stop words unique to this dataset. The overall positive VS negative tweet counts are skewed in the opposite direction as the ‘neutral’ category here is somewhat added to the postively classified category.</p>
 <div class="cell" data-execution_count="8">
@@ -2423,7 +2424,7 @@ Figure 3: Number of tweets per sentiment (positive, neutral, negative).
 Table 4: Accuracy of the model
 </figcaption>
 <div aria-describedby="tbl-model-accuracy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="68">
+<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="8">
 <table class="do-not-create-environment cell caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
@@ -2454,7 +2455,7 @@ Table 4: Accuracy of the model
 Table 5: Most frequent words in positive tweets
 </figcaption>
 <div aria-describedby="tbl-positive-words-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="70">
+<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="10">
 <table class="do-not-create-environment cell caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
@@ -2494,7 +2495,7 @@ Table 5: Most frequent words in positive tweets
 Table 6: Most frequent words in negative tweets
 </figcaption>
 <div aria-describedby="tbl-negative-words-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="72">
+<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="12">
 <table class="do-not-create-environment cell caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
@@ -2564,9 +2565,13 @@ Figure 5: Word cloud of positive tweets
 </figure>
 </div>
 <p>However, it is interesting that news is the most negative word since in itself it is neither positively or negatively connotated, but it is well known that Donald Trump considers news as fake and not to be trusted.</p>
-<div id="91d418a4" class="cell" data-execution_count="13">
-<div class="cell-output cell-output-display" data-execution_count="73">
-<style>#sk-container-id-5 {
+</section>
+</section>
+<section id="data-validation" class="level2">
+<h2 class="anchored" data-anchor-id="data-validation">Data validation</h2>
+<div id="4d7f714d" class="cell" data-execution_count="13">
+<div class="cell-output cell-output-display" data-execution_count="13">
+<style>#sk-container-id-1 {
 
 --sklearn-color-text: #000;
 --sklearn-color-text-muted: #666;
@@ -2594,13 +2599,13 @@ Figure 5: Word cloud of positive tweets
 --sklearn-color-icon: #878787;
 }
 }
-#sk-container-id-5 {
+#sk-container-id-1 {
 color: var(--sklearn-color-text);
 }
-#sk-container-id-5 pre {
+#sk-container-id-1 pre {
 padding: 0;
 }
-#sk-container-id-5 input.sk-hidden--visually {
+#sk-container-id-1 input.sk-hidden--visually {
 border: 0;
 clip: rect(1px 1px 1px 1px);
 clip: rect(1px, 1px, 1px, 1px);
@@ -2611,19 +2616,19 @@ padding: 0;
 position: absolute;
 width: 1px;
 }
-#sk-container-id-5 div.sk-dashed-wrapped {
+#sk-container-id-1 div.sk-dashed-wrapped {
 border: 1px dashed var(--sklearn-color-line);
 margin: 0 0.4em 0.5em 0.4em;
 box-sizing: border-box;
 padding-bottom: 0.4em;
 background-color: var(--sklearn-color-background);
 }
-#sk-container-id-5 div.sk-container {
+#sk-container-id-1 div.sk-container {
 
 display: inline-block !important;
 position: relative;
 }
-#sk-container-id-5 div.sk-text-repr-fallback {
+#sk-container-id-1 div.sk-text-repr-fallback {
 display: none;
 }
 div.sk-parallel-item,
@@ -2636,36 +2641,36 @@ background-repeat: no-repeat;
 background-position: center center;
 }
 
-#sk-container-id-5 div.sk-parallel-item::after {
+#sk-container-id-1 div.sk-parallel-item::after {
 content: "";
 width: 100%;
 border-bottom: 2px solid var(--sklearn-color-text-on-default-background);
 flex-grow: 1;
 }
-#sk-container-id-5 div.sk-parallel {
+#sk-container-id-1 div.sk-parallel {
 display: flex;
 align-items: stretch;
 justify-content: center;
 background-color: var(--sklearn-color-background);
 position: relative;
 }
-#sk-container-id-5 div.sk-parallel-item {
+#sk-container-id-1 div.sk-parallel-item {
 display: flex;
 flex-direction: column;
 }
-#sk-container-id-5 div.sk-parallel-item:first-child::after {
+#sk-container-id-1 div.sk-parallel-item:first-child::after {
 align-self: flex-end;
 width: 50%;
 }
-#sk-container-id-5 div.sk-parallel-item:last-child::after {
+#sk-container-id-1 div.sk-parallel-item:last-child::after {
 align-self: flex-start;
 width: 50%;
 }
-#sk-container-id-5 div.sk-parallel-item:only-child::after {
+#sk-container-id-1 div.sk-parallel-item:only-child::after {
 width: 0;
 }
 
-#sk-container-id-5 div.sk-serial {
+#sk-container-id-1 div.sk-serial {
 display: flex;
 flex-direction: column;
 align-items: center;
@@ -2675,12 +2680,12 @@ padding-left: 1em;
 }
 
 
-#sk-container-id-5 div.sk-toggleable {
+#sk-container-id-1 div.sk-toggleable {
 
 background-color: var(--sklearn-color-background);
 }
 
-#sk-container-id-5 label.sk-toggleable__label {
+#sk-container-id-1 label.sk-toggleable__label {
 cursor: pointer;
 display: flex;
 width: 100%;
@@ -2692,97 +2697,97 @@ align-items: start;
 justify-content: space-between;
 gap: 0.5em;
 }
-#sk-container-id-5 label.sk-toggleable__label .caption {
+#sk-container-id-1 label.sk-toggleable__label .caption {
 font-size: 0.6rem;
 font-weight: lighter;
 color: var(--sklearn-color-text-muted);
 }
-#sk-container-id-5 label.sk-toggleable__label-arrow:before {
+#sk-container-id-1 label.sk-toggleable__label-arrow:before {
 
 content: "▸";
 float: left;
 margin-right: 0.25em;
 color: var(--sklearn-color-icon);
 }
-#sk-container-id-5 label.sk-toggleable__label-arrow:hover:before {
+#sk-container-id-1 label.sk-toggleable__label-arrow:hover:before {
 color: var(--sklearn-color-text);
 }
 
-#sk-container-id-5 div.sk-toggleable__content {
+#sk-container-id-1 div.sk-toggleable__content {
 display: none;
 text-align: left;
 
 background-color: var(--sklearn-color-unfitted-level-0);
 }
-#sk-container-id-5 div.sk-toggleable__content.fitted {
+#sk-container-id-1 div.sk-toggleable__content.fitted {
 
 background-color: var(--sklearn-color-fitted-level-0);
 }
-#sk-container-id-5 div.sk-toggleable__content pre {
+#sk-container-id-1 div.sk-toggleable__content pre {
 margin: 0.2em;
 border-radius: 0.25em;
 color: var(--sklearn-color-text);
 
 background-color: var(--sklearn-color-unfitted-level-0);
 }
-#sk-container-id-5 div.sk-toggleable__content.fitted pre {
+#sk-container-id-1 div.sk-toggleable__content.fitted pre {
 
 background-color: var(--sklearn-color-fitted-level-0);
 }
-#sk-container-id-5 input.sk-toggleable__control:checked~div.sk-toggleable__content {
+#sk-container-id-1 input.sk-toggleable__control:checked~div.sk-toggleable__content {
 
 display: block;
 width: 100%;
 overflow: visible;
 }
-#sk-container-id-5 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {
+#sk-container-id-1 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {
 content: "▾";
 }
 
-#sk-container-id-5 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {
+#sk-container-id-1 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {
 color: var(--sklearn-color-text);
 background-color: var(--sklearn-color-unfitted-level-2);
 }
-#sk-container-id-5 div.sk-label.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
+#sk-container-id-1 div.sk-label.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
 background-color: var(--sklearn-color-fitted-level-2);
 }
 
 
-#sk-container-id-5 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {
+#sk-container-id-1 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {
 
 background-color: var(--sklearn-color-unfitted-level-2);
 }
-#sk-container-id-5 div.sk-estimator.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
+#sk-container-id-1 div.sk-estimator.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
 
 background-color: var(--sklearn-color-fitted-level-2);
 }
-#sk-container-id-5 div.sk-label label.sk-toggleable__label,
-#sk-container-id-5 div.sk-label label {
+#sk-container-id-1 div.sk-label label.sk-toggleable__label,
+#sk-container-id-1 div.sk-label label {
 
 color: var(--sklearn-color-text-on-default-background);
 }
 
-#sk-container-id-5 div.sk-label:hover label.sk-toggleable__label {
+#sk-container-id-1 div.sk-label:hover label.sk-toggleable__label {
 color: var(--sklearn-color-text);
 background-color: var(--sklearn-color-unfitted-level-2);
 }
 
-#sk-container-id-5 div.sk-label.fitted:hover label.sk-toggleable__label.fitted {
+#sk-container-id-1 div.sk-label.fitted:hover label.sk-toggleable__label.fitted {
 color: var(--sklearn-color-text);
 background-color: var(--sklearn-color-fitted-level-2);
 }
 
-#sk-container-id-5 div.sk-label label {
+#sk-container-id-1 div.sk-label label {
 font-family: monospace;
 font-weight: bold;
 display: inline-block;
 line-height: 1.2em;
 }
-#sk-container-id-5 div.sk-label-container {
+#sk-container-id-1 div.sk-label-container {
 text-align: center;
 }
 
-#sk-container-id-5 div.sk-estimator {
+#sk-container-id-1 div.sk-estimator {
 font-family: monospace;
 border: 1px dotted var(--sklearn-color-border-box);
 border-radius: 0.25em;
@@ -2791,16 +2796,16 @@ margin-bottom: 0.5em;
 
 background-color: var(--sklearn-color-unfitted-level-0);
 }
-#sk-container-id-5 div.sk-estimator.fitted {
+#sk-container-id-1 div.sk-estimator.fitted {
 
 background-color: var(--sklearn-color-fitted-level-0);
 }
 
-#sk-container-id-5 div.sk-estimator:hover {
+#sk-container-id-1 div.sk-estimator:hover {
 
 background-color: var(--sklearn-color-unfitted-level-2);
 }
-#sk-container-id-5 div.sk-estimator.fitted:hover {
+#sk-container-id-1 div.sk-estimator.fitted:hover {
 
 background-color: var(--sklearn-color-fitted-level-2);
 }
@@ -2878,7 +2883,7 @@ display: block;
 }
 /* "?"-specific style due to the `<a>` HTML tag */
 
-#sk-container-id-5 a.estimator_doc_link {
+#sk-container-id-1 a.estimator_doc_link {
   float: right;
   font-size: 1rem;
   line-height: 1em;
@@ -2893,21 +2898,21 @@ display: block;
   border: var(--sklearn-color-unfitted-level-1) 1pt solid;
 }
 
-#sk-container-id-5 a.estimator_doc_link.fitted {
+#sk-container-id-1 a.estimator_doc_link.fitted {
   /* fitted */
   border: var(--sklearn-color-fitted-level-1) 1pt solid;
   color: var(--sklearn-color-fitted-level-1);
 }
 
 /* On hover */
-#sk-container-id-5 a.estimator_doc_link:hover {
+#sk-container-id-1 a.estimator_doc_link:hover {
   /* unfitted */
   background-color: var(--sklearn-color-unfitted-level-3);
   color: var(--sklearn-color-background);
   text-decoration: none;
 }
 
-#sk-container-id-5 a.estimator_doc_link.fitted:hover {
+#sk-container-id-1 a.estimator_doc_link.fitted:hover {
   /* fitted */
   background-color: var(--sklearn-color-fitted-level-3);
 }
@@ -2975,7 +2980,7 @@ display: block;
     height: 14px;
     cursor: pointer;
 }
-</style><div id="sk-container-id-5" class="sk-top-container"><div class="sk-text-repr-fallback"><pre>LogisticRegression(max_iter=2000)</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br>On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-5" type="checkbox" checked><label for="sk-estimator-id-5" class="sk-toggleable__label fitted sk-toggleable__label-arrow"><div><div>LogisticRegression</div></div><div><a class="sk-estimator-doc-link fitted" rel="noreferrer" target="_blank" href="https://scikit-learn.org/1.7/modules/generated/sklearn.linear_model.LogisticRegression.html">?<span>Documentation for LogisticRegression</span></a><span class="sk-estimator-doc-link fitted">i<span>Fitted</span></span></div></label><div class="sk-toggleable__content fitted" data-param-prefix>
+</style><div id="sk-container-id-1" class="sk-top-container"><div class="sk-text-repr-fallback"><pre>LogisticRegression(max_iter=2000)</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br>On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-1" type="checkbox" checked><label for="sk-estimator-id-1" class="sk-toggleable__label fitted sk-toggleable__label-arrow"><div><div>LogisticRegression</div></div><div><a class="sk-estimator-doc-link fitted" rel="noreferrer" target="_blank" href="https://scikit-learn.org/1.7/modules/generated/sklearn.linear_model.LogisticRegression.html">?<span>Documentation for LogisticRegression</span></a><span class="sk-estimator-doc-link fitted">i<span>Fitted</span></span></div></label><div class="sk-toggleable__content fitted" data-param-prefix>
         <div class="estimator-table">
             <details>
                 <summary>Parameters</summary>
@@ -3107,14 +3112,10 @@ document.querySelectorAll('.fa-regular.fa-copy').forEach(function(element) {
 </script>
 </div>
 </div>
-</section>
-</section>
-<section id="data-validation" class="level3">
-<h3 class="anchored" data-anchor-id="data-validation">Data validation:</h3>
 <section id="targetresponse-variable-follows-expected-distribution-validation" class="level4">
-<h4 class="anchored" data-anchor-id="targetresponse-variable-follows-expected-distribution-validation">Target/response variable follows expected distribution validation:</h4>
+<h4 class="anchored" data-anchor-id="targetresponse-variable-follows-expected-distribution-validation">Target/response variable follows expected distribution validation</h4>
 <p>For this question, since the dataset we used did not have a “target” column, we had to try using different methods in order to find the “sentiment” of the tweets this has been discussed with Instructor Sky Sheng and she gave us the go ahead. As the graphs/values of the check for usiing CountVectorizer and Logistic Regression below suggest, we do see a skewness towards positive tweets, which can be surprising to many people. This is partly due to neutral tweets are lumped together with positive tweets. However, since this dataset is about Trump’s tweets while he was in office, those tweets could be positive because he was the “powerful man” back then.</p>
-<div id="b7175013" class="cell" data-execution_count="14">
+<div id="9aeeda93" class="cell" data-execution_count="14">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -3132,9 +3133,9 @@ document.querySelectorAll('.fa-regular.fa-copy').forEach(function(element) {
 </div>
 </section>
 <section id="no-anomalous-correlations-between-targetresponse-variable-and-featuresexplanatory-variables-validation" class="level4">
-<h4 class="anchored" data-anchor-id="no-anomalous-correlations-between-targetresponse-variable-and-featuresexplanatory-variables-validation">No anomalous correlations between target/response variable and features/explanatory variables validation:</h4>
+<h4 class="anchored" data-anchor-id="no-anomalous-correlations-between-targetresponse-variable-and-featuresexplanatory-variables-validation">No anomalous correlations between target/response variable and features/explanatory variables validation</h4>
 <p>For this question, again since the dataset we used did not have a “target” column, we tried our best to validate what was done. We can see that negative tweets has a higher mean length compared to positive tweets. However, there is no real correlation between time of day (even though negative tweets seem to appear slightly later in the day) or day of the week. In the wordclouds above, we do not see a clear intersection of words both appearing frequently in positive tweets and negative tweets which shows that our classification is working quite well. Last but not least, the model probability distribution graph shows that the model confidently picked up positive and negative tweets while still showing uncertainty for ambiguous cases, which is expected for a simple classifier trained on weak, lexicon-based labels.</p>
-<div id="67163c4d" class="cell" data-execution_count="15">
+<div id="2d801058" class="cell" data-execution_count="15">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -3160,10 +3161,9 @@ document.querySelectorAll('.fa-regular.fa-copy').forEach(function(element) {
 <p>Figure 10a: Tweet length stats according to sentiments <br> Figure 10b: Distribution graphs for time of day and day of the week related to sentiments <br> Figure 10c: Model prediction probability distribution graph <br></p>
 </section>
 </section>
-</section>
 <section id="discussion" class="level2">
 <h2 class="anchored" data-anchor-id="discussion">Discussion</h2>
-<p>Within this report we considered multiple aspects of the tweets. Firstly we determined that Donald Trump’s most productive time and season for posting was overnight during the summer. Then we determined that, contrary to what we originally believed, most of his tweets are actually positively connotated. Now, as mentioned above, our sentiment classification methods might not be a faithful representation of the sentiment of the tweets, as the models do not consider intricacies (sarcasm, neutral tweets added to positive class) that can change the sentiment of the message.</p>
+<p>Within this report we considered multiple aspects of the tweets. Firstly we determined that Donald Trump’s most productive time and season for posting was Summer during the evening. Then we determined that, contrary to what we originally believed, most of his tweets are actually positively connotated. Now, as mentioned above, our sentiment classification methods might not be a faithful representations of the sentiment of the tweets, as there might be hidden meanings that the bag of words approach does not pick up on.</p>
 </section>
 <section id="references" class="level2 unnumbered">
 
