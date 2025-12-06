@@ -6,10 +6,12 @@ format:
     html:
         toc: true
         toc-depth: 2
+embed-resources: true
 bibliography: references.bib
 execute:
   echo: false
   warning: false
+
 ---
 
 
@@ -43,392 +45,48 @@ Twitter (also known as X) is one of the world's most popular social media platfo
 
 The dataset we are using contains all tweets published (includes deleted tweets) published by Donald Trump during his first presidency between 20 Jan 2017 and 08 Jan 2021. It contains 5 columns (ID, Time, Tweet URL, Tweet Text) and each row represents a tweet. The dataset can be found in this repository [CompleteTrumpTweetsArchive](https://github.com/MarkHershey/CompleteTrumpTweetsArchive?tab=readme-ov-file "CompleteTrumpTweetsArchive"), in the data folder, specifically the file [realDonaldTrump_in_office.csv](https://github.com/MarkHershey/CompleteTrumpTweetsArchive/blob/master/data/realDonaldTrump_in_office.csv "realDonaldTrump_in_office.csv").
 
-
-
----
-title: Trump Twitter Analysis
-jupyter: python3
----
-
-# Group 14: MDS 522 : Members: <br> Quan Hoang, Mailys Guegon, Joel Peterson, Li Pu 
-Analyzing the <b>realDonaldTrump_in_office.csv </b>
-from https://github.com/MarkHershey/CompleteTrumpTweetsArchive/blob/master/data/realDonaldTrump_in_office.csv
-
-
-# Summary
-Here we are analyzing Tweets published by Donald Trump during his first presidency, specifically how the time of day or season affect the frequency of the tweets. Additionally, we did sentiment analysis using a VADER for classification to determine the frequency of positive, negative and neutral tweets. Finally, using a combination of CountVectorizer and Logistic Regression, we used WorldCloud visualization to determine the most frequent positive and negative words.
-
-## Introduction
-Twitter (also known as X) is one of the world's most popular social media platforms, where users can share short messages (texts, videos, photos) known as tweets.
-In April 2025, the Pew Research Center did a study and found that on average active users published 157 tweets per month, which is around 5 tweets per day. At the beginning of his first presidency, Donald Trump followed the average, posting about 5.7 times per day. However towards the second half of 2020, his posting rate grew to around 34.8 times per day. On June 5 2020, he went as far as tweeting or retweeting 200 messages in a single day. With so much data, we though it would be interesting to consider what could affect his frequency of posting. The president uses the platform mostly to disparage those he perceives as threats (people, companies, countries...), with more than half of his tweets between January 2017 and October 2019 being used to attack something or someone. Another intresting question to consider would be to determine the frequency of positive and negative tweets throughout his presidency. In this report, we will start by considering different  the factors (time of day or season) that might have an impact on the frequency of the tweets, then we will classify the tweets into positive, negative or neutral to determine the most frequent sentiment expressed in his posts. 
-
-## Imports
-
-```{python}
-import warnings # Used Chat GPT to help find a solution to hide the warning 
-warnings.filterwarnings("ignore", message="pkg_resources is deprecated", category=UserWarning)
-
-import pandas as pd
-import altair as alt
-import requests
-
-# Data validation
-import pandera.pandas as pa
-from pandera.pandas import Column, DataFrameSchema
-from deepchecks.tabular import Dataset
-from deepchecks.tabular.checks import StringMismatch
-from deepchecks.tabular.checks import IsSingleValue
-import seaborn as sns
-from deepchecks.tabular.checks.data_integrity import FeatureFeatureCorrelation
-from deepchecks.tabular.checks import FeatureLabelCorrelation
-
-# Sentiment analysis
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-import re
-from collections import Counter
-from wordcloud import WordCloud
-import matplotlib.pyplot as plt
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
-
-
-
-```
-
-## Data
-The dataset we are using contains all tweets published (includes deleted tweets) published by Donald Trump during his first presidency between 20 Jan 2017 and 08 Jan 2021. It contains 5 columns (ID, Time, Tweet URL, Tweet Text) and each row represents a tweet.
-For the initial EDA and data processing we ended up having to drop around 1/2 of the rows to stop unconventional characters at the end of the tweet string from tripping up pandas. After a visual review we noticed that these problem rows were quite evenly distributed (every 2-3 rows) and that this wouldn't be too much of an issue to get started. <br> <br>
-All of the data and rows have now been recovered. All numbers and values have been updated and applied to the analysis and put through further validation processes.
-
-```{python}
-def load_clean_trump_csv(url):                # chatGPT assistance to construct this data-cleaning function from URL
-    resp = requests.get(url)                   # download the csv text from passed URL
-    resp.raise_for_status()                     # raise if 4xx/5xx
-    lines = resp.text.splitlines()
-
-    rows = []
-
-    for i, line in enumerate(lines, start=1):
-        line = line.rstrip("\n\r")
-        if not line.strip():
-            continue                                   # skip empty lines
-
-        parts = line.split(",")
-
-        if i == 1:                                        # skip header row => define custom column names later
-            continue
-
-        if len(parts) < 4:                                  # if fewer than 4 parts => it's truly broken => drop
-            continue
-
-        id_val = parts[0].strip()                              # the first 3 columns don't need cleaning
-        time_val = parts[1].strip()
-        url_val = parts[2].strip()
-        tweet_text = ",".join(parts[3:]).strip()
-
-        rows.append((id_val, time_val, url_val, tweet_text))
-
-    df = pd.DataFrame(rows, columns=["ID", "Time", "Tweet URL", "Tweet Text"])
-    return df
-
-
-url = "https://raw.githubusercontent.com/MarkHershey/CompleteTrumpTweetsArchive/refs/heads/master/data/realDonaldTrump_in_office.csv"
-
-tweets = load_clean_trump_csv(url)
-
-tweets.columns = tweets.columns.str.strip()                                # strip white-space from before column names 
-#print(tweets.columns)
-tweets["Date & Time"] = pd.to_datetime(tweets["Time"], errors="coerce")     # set Time column to DateTime and rename
-tweets = tweets.drop(columns=["ID", "Tweet URL", "Time"])                     # drop ID => twitter-handle, Tweet URL, Time => now "Date & Time"
-
-print(tweets.shape)
-tweets.head(10)
-```
-
-### DATA VALIDATION: Panderas 
-
-We have cleaned the column names to ensure they are correct and created a function to download the data from URL to ensure it has the correct file format.
-
-### Missingness not beyond expected threshold and no empty observations
-
-```{python}
-schema = DataFrameSchema(
-    {
-        "Date & Time": Column(pa.DateTime, nullable=False, coerce=True),
-        "Tweet Text": Column(pa.String, nullable=False),
-    },
-    checks=[pa.Check(lambda df: ~(df.isna().all(axis=1)).any(), error="Empty rows found.")
-    ]
-)
-
-tweets_valid = schema.validate(tweets)
-```
-
-### Correct data types in each column
-
-To ensure that our dataset is clean and ready for downstream analysis, we first verify that each column has the correct data type. Since our dataset contains text, and a timestamp index, incorrect types (such as strings for dates) could break the analysis or produce misleading results.
-Below, we inspect and correct data types as needed.
-
-```{python}
-print("Column data types:")
-print(tweets.dtypes)
-
-# Check whether datetime exists either as a column OR as index
-if isinstance(tweets.index, pd.DatetimeIndex):
-    print("\nDatetime index detected — dates are correctly parsed as index.")
-else:
-    if "Date" in tweets.columns:
-        print("\n'Date' column exists — check first few values:")
-        print(tweets["Date"].head())
-    else:
-        print("\nNo datetime information found (neither column nor index).")
-```
-
-### No duplicates observations
-We checked for duplicated rows using DataFrame.duplicated(). The dataset contains no duplicate entries, meaning each tweet represents a unique observation.
-
-```{python}
-dup_count = tweets.duplicated().sum()
-print(f"Number of duplicated rows: {dup_count}")
-
-# If duplicates exist, remove them
-if dup_count > 0:
-    tweets = tweets.drop_duplicates()
-    print("Duplicates removed.")
-else:
-    print("No duplicate observations found.")
-```
-
-### No outlier or anomalous values
-We examined tweet length distribution using descriptive statistics, a boxplot, and the IQR (1.5×IQR rule). 0 number of extreme values were detected, and they are reasonable for tweet text length(there's 280 characters limits).
-
-```{python}
-tweets["length"] = tweets["Tweet Text"].str.len()
-
-print("Length descriptive statistics:")
-print(tweets["length"].describe())
-
-# Boxplot to visualize outliers
-sns.boxplot(data=tweets, x="length")
-plt.title("Outlier Check — Tweet Length")
-plt.show()
-
-# Using IQR rule to detect outliers
-Q1 = tweets["length"].quantile(0.25)
-Q3 = tweets["length"].quantile(0.75)
-IQR = Q3 - Q1
-lower_bound = Q1 - 1.5 * IQR
-upper_bound = Q3 + 1.5 * IQR
-
-outliers = tweets[(tweets["length"] < lower_bound) | (tweets["length"] > upper_bound)]
-print(f"Number of detected outliers: {outliers.shape[0]}")
-```
-
 ## Analysis
 
 ### Part 1: Does the time of day/period of the year affect the frequency of the tweets?
 
-With the president posting 34.8 times per day it is interesting to consider whether the time of day or even the period of the year affects the frequency of his tweets. <br>
-Before our analysis, we believed that the frequency of tweets would be highest during the daytime and night-time. These assumptions were proven wrong as the numbers show that the most frequent time of day for tweets was the overnight period. 
+With the president posting 34.8 times per day [@shear2019trump] it is interesting to consider whether the time of day or even the period of the year affects the frequency of his tweets. <br>
+Before our analysis, we believed that the frequency of tweets would be highest during the daytime and night-time. These assumptions were proven wrong as the numbers show that the most frequent time of day for tweets was the `{python} most_frequent_time` period. 
 
--  The initial data filtering by time of day visualized in the bar chart shows that the highest frequency of tweets occurs during the evening period between 4:01 pm - 12:00 am (as mentioned above) with a total of 8825 analyzed tweets. The second most frequent tweet period occurred during the overnight period between  12:01 am - 8:00 am with a total of 7881 analyzed tweets, with the time of day resulting in the least frequent amount of tweets actually being the daytime period between 8:01am-4:00pm with a total of 6369 analyzed tweets. Perhaps this is because Trump is most busy during the day (golfing?) and cannot tend to tweets.
+The initial data filtering by time of day visualized in the bar chart shows that the highest frequency of tweets occurs during the `{python} most_frequent_time` period between `{python} time_day_summary.loc[0,'Time Range']` (as mentioned above) with a total of `{python} time_day_summary['Count'].max()` analyzed tweets. The second most frequent tweet period occurred during the `{python} time_day_summary.loc[1,'Time of Day']` period between `{python} time_day_summary.loc[1,'Time Range']` with a total of `{python} time_day_summary.loc[1,'Count']` analyzed tweets, with the time of day resulting in the least frequent amount of tweets actually being the `{python} least_frequent_time` period between `{python} time_day_summary.loc[2,'Time Range']` with a total of `{python} time_day_summary['Count'].min()` analyzed tweets. Perhaps this is because Trump is most busy during the day (golfing?) and cannot tend to tweets.
+
 
 ```{python}
-tweets = tweets.set_index("Date & Time")                                  # set index to DateTime for filtering 
-
-
-daytime = tweets.between_time("08:01", "16:00")                             # 8:01 am - 4:00 pm
-evening = tweets.between_time("16:01", "00:00")                              # 4:01 pm - 12:00 am
-overnight = tweets.between_time("00:01", "08:00")                             # 12:01 am - 8:00 am
-
-print(f"The number of tweets in the 'Daytime' category is: {len(daytime)}")
-print(f"The number of tweets in the 'Evening' category is: {len(evening)}")
-print(f"The number of tweets in the 'Overnight' category is: {len(overnight)}")
-
-print("Just by the distribution of tweets it is surprisingly evenly spread; with the most tweets happening in the evening.")
-
-```
-
-```{python}
-tweet_time = pd.DataFrame({
-    "Time": ["daytime", "evening", "overnight"],
-    "Count": [len(daytime), len(evening), len(overnight)]
-})
-
-tweet_time
+from IPython.display import Markdown
+Markdown(time_day_summary.to_markdown(index = False))
 ```
 
 Figure 1: Number of tweets published by time of day (daytime: 8:01 am - 4:00 pm, evening: 4:01 pm - 12:00 am, overnight: 12:01 am - 8:00 am )
 
--  The seasonal filtering of the tweets returned the results of the most frequent amount of tweets being in the summer with 6747 analyzed tweets, with the autumn being the second busiets season for tweets resulting in 6401 analysed tweets, followed by the spring recording 5543 analyzed tweets, and lastly the winter being the least busy season for tweets recording a number of 4384 tweets. This falls inline with inutitive assumptions about mood and activity as the summer is usually the busiest with longer days (daylight) and nicer weather, then the fall slowly tapers off into the winter season being the shortest days for daylight and the most restricting weather.
+The seasonal filtering of the tweets returned the results of the most frequent amount of tweets being in the `{python} most_frequent_season` with `{python} season_summary['Count'].max()` analyzed tweets, with the `{python} season_summary.loc[1,'Season']` being the second busiest season for tweets resulting in `{python} season_summary.loc[1,'Count']` analysed tweets, followed by the `{python} season_summary.loc[2,'Season']` recording `{python} season_summary.loc[2,'Count']` analyzed tweets, and lastly the `{python} least_frequent_season` being the least busy season for tweets recording a number of `{python} season_summary.loc[3,'Count']` tweets. This falls inline with inutitive assumptions about mood and activity as the summer is usually the busiest with longer days (daylight) and nicer weather, then the fall slowly tapers off into the winter season being the shortest days for daylight and the most restricting weather.
+
 
 ```{python}
-tw = pd.Series(tweets.index.strftime('%m-%d'), index=tweets.index)     # ChatGPT assistance to troubleshoot filtering datetimes in index
-
-spring = tweets.loc[tw.between('04-01', '06-30')]                    # April 1st - June 30th
-summer = tweets.loc[tw.between('07-01', '09-30')]                   # July 1st - September 30th
-autumn = tweets.loc[tw.between('10-01', '12-31')]                  # October 1st - December 31st
-winter = tweets.loc[tw.between('01-01', '03-31')]                 # January 1st - March 31st 
-
-print(f"The number of tweets in the 'Spring' category is: {len(spring)}")
-print(f"The number of tweets in the 'Summer' category is: {len(summer)}")
-print(f"The number of tweets in the 'Autumn' category is: {len(autumn)}")
-print(f"The number of tweets in the 'Winter' category is: {len(winter)}")
-print("")
-print("Judging by the distribution of tweets throughout the seasons, the frequency decays in the winter and spring and peaks in the summer")
-```
-
-```{python}
-tweet_season = pd.DataFrame({
-    "Season": ["Spring", "Summer", "Autumn", "Winter"],
-    "Count": [len(spring), len(summer), len(autumn), len(winter)]
-})
-
-tweet_season
+from IPython.display import Markdown
+Markdown(season_summary.to_markdown(index = False))
 ```
 
 Figure 2: Number of tweets published by season (Spring: April 1st - June 30th, Summer: July 1st - September 30th, Autumn: October 1st - December 31st, Winter: January 1st - March 31st)
 
 Creating the time of day frequency charts:
 
-```{python}
-time_bars = alt.Chart(tweet_time).mark_bar(color="#f00808").encode(
-    y = "Time:N", 
-    x = "Count:Q",
-    ).properties(
-    title="Trump's Tweet Frequency by Time of Day",
-    width=500,
-    height=350)
+![](../results/figures/tweet_frequency_time_of_day.png)
 
-#time_bars
-```
-
-```{python}
-label_df = pd.DataFrame({
-    "Time": ["daytime", "evening", "overnight"],
-    "range": ["8:01am–4:00pm", "4:01pm–12:00am", "12:01am–8:00am"],
-    "Count": tweet_time["Count"].values
-})
-```
-
-```{python}
-range_text = (
-    alt.Chart(label_df)
-    .mark_text(
-        align="center",
-        baseline="middle",
-        color="white",
-        fontSize=16,
-        dx=-80
-    )
-    .encode(
-        y="Time:N",
-        x="Count:Q",
-        text="range:N"
-    )
-)
-
-#time_bars + range_text
-```
-
-```{python}
-count_text = alt.Chart(label_df).mark_text(
-    align="left",
-    baseline="middle",
-    dx=5,
-    color="black",
-    fontSize=14
-).encode(
-    y="Time:N",
-    x="Count:Q",      
-    text="Count:Q"
-)
-
-tweet_times = time_bars + range_text + count_text
-#tweet_times
-```
-
-```{python}
-final_time_of_day_chart = (time_bars + range_text + count_text).properties(padding={"right": 50, "top":15, "bottom":15, "left":10})   # <= add some white-space to balance appearance
-final_time_of_day_chart
-```
 
 Figure 3: Trump's Tweet Frequency by Time of Day
 
 Creating the seasonal frequency charts:
 
-```{python}
-season_bars = alt.Chart(tweet_season).mark_bar(color="#f00808").encode(
-    x="Count:Q",
-    y=alt.Y("Season:N",sort=["Spring", "Summer", "Autumn", "Winter"])
-    ).properties(
-    title="Trump's Tweet Frequency by Season",
-    width=500,
-    height=350)
-
-#season_bars
-```
-
-```{python}
-season_label_df = pd.DataFrame({
-    "Season": ["Spring", "Summer", "Autumn", "Winter"],
-    "range": ["April 1st - June 30th", "July 1st – Sept 30th", "Oct 1st – Dec 31st", "Jan 1st - March 31st"],
-    "Count": tweet_season["Count"].values
-})
-#season_label_df
-```
-
-```{python}
-season_range_text = alt.Chart(season_label_df).mark_text(
-        align="center",
-        baseline="middle",
-        color="white",
-        fontSize=16,
-        dx=-90
-    ).encode(
-        y=alt.Y("Season:N",sort=["Spring", "Summer", "Autumn", "Winter"]),
-        x="Count:Q",
-        text="range:N"
-    )
-
-#season_bars + season_range_text
-```
-
-```{python}
-season_count_text = alt.Chart(season_label_df).mark_text(
-    align="left",
-    baseline="middle",
-    dx=5,
-    color="black",
-    fontSize=14
-).encode(
-    y=alt.Y("Season:N",sort=["Spring", "Summer", "Autumn", "Winter"]),
-    x="Count:Q",      
-    text="Count:Q"
-)
-
-tweet_seasons = season_bars + season_range_text + season_count_text
-#tweet_seasons
-```
-
-```{python}
-final_season_chart = (season_bars + season_range_text + season_count_text).properties(padding={"right": 50, "top":15, "bottom":15, "left":10})  # aesthetic padding 
-
-final_season_chart
-```
+![](../results/figures/tweet_frequency_season.png)
 
 Figure 4: Trump's Tweet Frequency by Season
 
-Visualizing our results we see that there is no major difference in posting frequency given the time of day, but there is a difference for different seasons.
+Hence, we can see that there is a variation in the frequency depending on time of day and that there is a `{python} time_freq_increase`% increase in the number of tweets published from the `{python} least_frequent_time` to the `{python} most_frequent_time`. We also found that changing the season also had an impact on the frequency, with there being a `{python} season_freq_increase`% increase in the number of tweets from the season where he posts the least (`{python} least_frequent_season`) to the season where he posts the most (`{python} most_frequent_season`). 
 
-```{python}
-#| scrolled: true
-tweet_charts = (tweet_seasons | tweet_times).properties(padding={"right": 50, "top":25, "bottom":25, "left":25}) 
-tweet_charts
-```
-
-Figure 5: Trump's Tweet Frequency by Time of Day and Season 
 
 ### Part 2: How many tweets are positive vs negative? (2 classification methods)
 When we think of the tweets posted by the president, we tend to think mostly of those where he critices or attacks others. However, is this a real representation of the sentiments of his tweets? In this part we will use two different sentiment analysis models to determine the frequency of positive, negative and neutral tweets.
@@ -436,65 +94,18 @@ When we think of the tweets posted by the president, we tend to think mostly of 
 <b> Method 1:</b>  
 We use a simple sentiment analysis model (VADER) to classify each tweet as positive, negative, or neutral, and then compare the counts, this methodological inspiration is from ChatGPT.
 
-```{python}
-#| scrolled: true
-sia = SentimentIntensityAnalyzer()
-```
 
 ```{python}
-tweets_q2 = tweets.copy()
-tweets_q2["Tweet Text"] = tweets_q2["Tweet Text"].fillna("").astype(str)
-
-tweets_q2["sentiment_score"] = tweets_q2["Tweet Text"].apply(
-    lambda t: sia.polarity_scores(t)["compound"]
-)
-
-def score_to_label(score, pos_threshold=0.05, neg_threshold=-0.05):
-    if score >= pos_threshold:
-        return "positive"
-    elif score <= neg_threshold:
-        return "negative"
-    else:
-        return "neutral"
-
-tweets_q2["sentiment_label"] = tweets_q2["sentiment_score"].apply(score_to_label)
-
-tweets_q2[["Tweet Text", "sentiment_score", "sentiment_label"]].head(10)
+from IPython.display import Markdown
+Markdown(sentiment_count.to_markdown(index = False))
 ```
 
-```{python}
-
-sentiment_counts = (
-    tweets_q2
-      .groupby("sentiment_label")
-      .size()
-      .reset_index(name="Count")   
-      .rename(columns={"sentiment_label": "Sentiment"})  
-)
-
-sentiment_counts
-```
 
 Figure 6: Number of tweets per sentiment (negative, neutral, positive)
 
 Using the VADER sentiment analyzer the tweets were classified as either positive, neutral, or negative. At first, we believed that the tweets were likely more negative than positive, but in fact the tweets were classified as far more positive than negative, almost doubling the negatively classified tweets. The tweets classified as 'neutral' fall almost directly in between the tweets classified as positive and negative. The actual context and literal meaning of the tweets was not analyzed, nor the accuracy of the classification at this point, so there is certainly going to be a margin of error and some 'false positives' etc as the positivity is quite often a self directed compliment of sorts.
 
-```{python}
-sentiment_chart = (
-    alt.Chart(sentiment_counts)
-    .mark_bar()
-    .encode(
-        x=alt.X("Sentiment:N", sort=["positive", "neutral", "negative"]),
-        y=alt.Y("Count:Q"),
-        tooltip=["Sentiment", "Count"]
-    )
-    .properties(
-        title="Number of Positive, Neutral, and Negative Tweets"
-    )
-)
-
-sentiment_chart
-```
+![](../results/figures/sentiment_counts.png)
 
 Figure 7: Chart Comparing the Number of Positive, Neutral, and Negative Tweets
 
@@ -503,182 +114,40 @@ Using a CountVectorizer and Logistic Regression, combining with a Wordcloud visu
 
 
 ```{python}
-positive_words = set("""good great amazing fantastic tremendous strong win winning beautiful success successful
-happy proud respect love best positive incredible honored grateful huge strong strongest great big""".split())
-
-negative_words = set("""bad terrible horrible weak fail failure disaster sad angry corrupt
-worst negative unfair hate disgrace stupid dishonest democrat biden obama democrats sleepy joe illegal""".split())  # democrat, biden, obama usually associated negatively when Trump speaks
-
-stopwords = set("""the a an and of to in is it this that for on with be as by are was were will from at have has but not or if so
-you your my our their they we i he she his her him them rt s all t just now amp more very about do what who people word should m realdonaldtrump u""".split())
-
-# -------------------------------------------------------------------
-# 1. Helper functions
-# -------------------------------------------------------------------
-
-def simple_tokenize(text: str):
-    """Lowercase everything, remove URLs and non letters, then split."""
-    text = text.lower()
-    text = re.sub(r"http\S+", "", text)          # remove URLs
-    text = re.sub(r"[^a-z\s]", " ", text)        # keep letters and spaces
-    return text.split()
-
-def weak_label(text: str):
-    """Use positive and negative lexicons to create weak labels for training."""
-    if not isinstance(text, str):
-        return None
-    tokens = simple_tokenize(text)
-    pos_hits = sum(1 for w in tokens if w in positive_words)
-    neg_hits = sum(1 for w in tokens if w in negative_words)
-    if pos_hits > neg_hits:
-        return "positive"
-    elif neg_hits > pos_hits:
-        return "negative"
-    else:
-        return None  # ambiguous, skip from training
-
-# -------------------------------------------------------------------
-# 2. Create weak labels for a subset of tweets
-# -------------------------------------------------------------------
-
-tweets["weak_label"] = tweets["Tweet Text"].apply(weak_label)
-train_df = tweets.dropna(subset=["weak_label"]).copy()
-
-print("Number of weak labeled tweets:", len(train_df))
-print(train_df["weak_label"].value_counts())
-
-# -------------------------------------------------------------------
-# 3. Train a simple ML model using CountVectorizer
-# -------------------------------------------------------------------
-
-X_train, X_test, y_train, y_test = train_test_split(
-    train_df["Tweet Text"],
-    train_df["weak_label"],
-    test_size=0.2,
-    random_state=42,
-    stratify=train_df["weak_label"]
-)
-
-vectorizer = CountVectorizer(stop_words=list(stopwords), min_df=3)
-X_train_vec = vectorizer.fit_transform(X_train.fillna(""))
-X_test_vec = vectorizer.transform(X_test.fillna(""))
-
-clf = LogisticRegression(max_iter=2000)
-clf.fit(X_train_vec, y_train)
-
-print("Validation accuracy (weak labels):", clf.score(X_test_vec, y_test))
-
-# -------------------------------------------------------------------
-# 4. Predict sentiment for all tweets (positive vs negative)
-# -------------------------------------------------------------------
-
-all_X = vectorizer.transform(tweets["Tweet Text"].fillna(""))
-tweets["Sentiment"] = clf.predict(all_X)
-
-print(tweets["Sentiment"].value_counts())
-
-# -------------------------------------------------------------------
-# 5. Answer the question "What are the most frequent words in the positive and negative tweets?"
-# -------------------------------------------------------------------
-
-pos_text = " ".join(tweets[tweets["Sentiment"] == "positive"]["Tweet Text"].dropna())
-neg_text = " ".join(tweets[tweets["Sentiment"] == "negative"]["Tweet Text"].dropna())
-
-pos_tokens = [w for w in simple_tokenize(pos_text) if w not in stopwords]
-neg_tokens = [w for w in simple_tokenize(neg_text) if w not in stopwords]
-
-top_pos = Counter(pos_tokens).most_common(20)
-top_neg = Counter(neg_tokens).most_common(20)
-
-top_pos_df = pd.DataFrame(top_pos, columns=["word", "count"])
-top_neg_df = pd.DataFrame(top_neg, columns=["word", "count"])
-
-print("\nMost frequent words in positive tweets:")
-print(top_pos_df)
-
-print("\nMost frequent words in negative tweets:")
-print(top_neg_df)
-
-# -------------------------------------------------------------------
-# 6. Wordcloud
-# -------------------------------------------------------------------
-pos_wc = WordCloud(
-    width=900,
-    height=500,
-    background_color="white"
-).generate(" ".join(pos_tokens))
-
-plt.figure(figsize=(10, 5))
-plt.imshow(pos_wc, interpolation="bilinear")
-plt.axis("off")
-plt.title("Positive Tweets Word Cloud")
-plt.show()
-
-neg_wc = WordCloud(
-    width=900,
-    height=500,
-    background_color="white"
-).generate(" ".join(neg_tokens))
-
-plt.figure(figsize=(10, 5))
-plt.imshow(neg_wc, interpolation="bilinear")
-plt.axis("off")
-plt.title("Negative Tweets Word Cloud")
-plt.show()
+from IPython.display import Markdown
+Markdown(sentiment_count.to_markdown(index = False))
 ```
+
 
 Figure 8a: Table with the number of weak labeled tweets <br>
 Figure 8b: Table with the number of tweets per sentiment (positive or negative) <br>
+```{python}
+from IPython.display import Markdown
+top_neg_words = pd.read_csv('../results/tables/top_negative_words.csv')
+Markdown(top_neg_words.to_markdown(index = False))
+```
+Figure 8c: Table of the most frequent words used in negative tweets <br>
+```{python}
+from IPython.display import Markdown
+top_pos_words = pd.read_csv('../results/tables/top_negative_words.csv')
+Markdown(top_pos_words.to_markdown(index = False))
+```
 Figure 8c: Table of the most frequent words used in positive tweets <br>
+
+
+![](../results/figures/wordcloud_positive.png)
 Figure 8d: Word cloud of the positive tweets <br>
+
+![](../results/figures/wordcloud_negative.png)
 Figure 8e: Word cloud of the negative tweets <br>
 
 The second classifier method used to analyze the tweets was utilizing the CountVectorizer() to classify sets as positive words, negative words and some stop words unique to this dataset. The overall positive VS negative tweet counts are skewed in the opposite direction as the 'neutral' category here is somewhat added to the postively classified category. The results of the most frequent words are not very surprising to anyone who has followed American news at all in the last 10 years with the positive tweets containing words of praise and common phrases used by Trump, as well as his own name. The most frequent words appearing in the negative tweets could also be somewhat assumed as they contain words of the opposing political parties and leaders as well as other common phrases and words that one would hear often in a news report of Trump lashing out over twitter or a speech. A somewhat interesting note is that the word 'Trump' appears frequently in both positive and negative classifications, but could be rationalized by the fact that Trump often speaks about himself in the third person. A great visual indicator of these word frequencies is the word clouds for the respective most frequent positive and negatively classified words. 
 
-### DATA VALIDATION: Sentiment Analysis 
 
-#### Correct category levels
-
-##### Checking for string mismatches
-
-```{python}
-dataset = Dataset(tweets.reset_index().drop('Tweet Text',axis=1), label = 'Sentiment', cat_features=['weak_label'])
-result = StringMismatch().run(dataset)
-result.show()
-```
-
-##### Checking for single values
-
-```{python}
-sv = IsSingleValue()
-sv.run(dataset)
-```
 
 #### Target/response variable follows expected distribution validation: 
 For this question, since the dataset we used did not have a "target" column, we had to try using different methods in order to find the "sentiment" of the tweets (this has been discussed with Instructor Sky Sheng and she gave us the go ahead. As the graphs/values of the check for usiing CountVectorizer and Logistic Regression below suggest, we do see a skewness towards positive tweets, which can be surprising to many people. This is partly due to neutral tweets are lumped together with positive tweets. However, since this dataset is about Trump's tweets while he was in office, those tweets could be positive because he was the "powerful man" back then. 
 
-```{python}
-# -------------------------------------------------------------------
-# Data validation related to target
-# -------------------------------------------------------------------
-
-# -------------------------------------------------------------------
-# 1. Distribution of Sentiment Graph
-# -------------------------------------------------------------------
-sns.countplot(data=tweets, x="Sentiment")
-plt.title("Distribution of Sentiment Labels")
-plt.show()
-# -------------------------------------------------------------------
-# 2. Distribution of Sentiment Proportion
-# -------------------------------------------------------------------
-print(tweets["Sentiment"].value_counts(normalize=True))
-# -------------------------------------------------------------------
-# 3. Time-based Distribution of Sentiment Graph
-# -------------------------------------------------------------------
-tweets.resample("M")["Sentiment"].value_counts().unstack().plot(kind="bar", figsize=(12,5))
-plt.title("Sentiment over time (monthly)")
-plt.show()
-```
 
 Figure 9a: Graph with the distribution of sentiment labels <br>
 Figure 9b: Proportion of sentiment labels values <br>
@@ -689,110 +158,11 @@ Figure 9c: Graph with the distribution of sentiment labels over time <br>
 #### No anomalous correlations between target/response variable and features/explanatory variables validation: 
 For this question, again since the dataset we used did not have a "target" column, we tried our best to validate what was done. We can see that negative tweets has a higher mean length compared to positive tweets. However, there is no real correlation between time of day (even though negative tweets seem to appear slightly later in the day) or day of the week. In the wordclouds above, we do not see a clear intersection of words both appearing frequently in positive tweets and negative tweets which shows that our classification is working quite well. Last but not least, the model probability distribution graph shows that the model confidently picked up positive and negative tweets while still showing uncertainty for ambiguous cases, which is expected for a simple classifier trained on weak, lexicon-based labels. 
 
-```{python}
-# -------------------------------------------------------------------
-# Data validation related to target pt.2
-# -------------------------------------------------------------------
-
-# -------------------------------------------------------------------
-# 1. Numeric correlations
-# -------------------------------------------------------------------
-tweets["length"] = tweets["Tweet Text"].str.len()
-print(tweets.groupby("Sentiment")["length"].describe())
-# -------------------------------------------------------------------
-# 2. Categorical correlations (hour of day, weekday)
-# -------------------------------------------------------------------
-tweets["hour"] = tweets.index.hour
-tweets["weekday"] = tweets.index.dayofweek
-sns.boxplot(data=tweets, x="Sentiment", y="hour")
-plt.show()
-sns.boxplot(data=tweets, x="Sentiment", y="weekday")
-plt.show()
-# -------------------------------------------------------------------
-# 3. Model probability checks
-# -------------------------------------------------------------------
-probs = clf.predict_proba(vectorizer.transform(tweets["Tweet Text"]))
-tweets["pos_prob"] = probs[:, 1]
-sns.histplot(tweets["pos_prob"])
-plt.title("Prediction Probability Distribution")
-plt.show()
-```
 
 Figure 10a: Tweet length stats according to sentiments <br>
 Figure 10b: Distribution graphs for time of day and day of the week related to sentiments <br>
 Figure 10c: Model prediction probability distribution graph <br>
 
-#### No anomalous correlations between features/explanatory variables
-
-Since our data set only contains a date time feature and a text feature, to check the correlation between them using deepchecks we can turn these features into categorical and numerical features.
-
-```{python}
-# Creating functions to turn Date & Time into categorical and numerical features
-def season(date):
-    if 4 <= date.month <=6:
-        return 'spring'
-    elif 7 <= date.month <=9:
-        return 'spring'
-    elif 10 <= date.month <=12:
-        return 'autumn'
-    else:
-        return 'winter'
-
-def daytime(date):
-    if pd.Timestamp('08:01').time() <= date.time() <= pd.Timestamp('16:00').time():
-        return 'daytime'
-    elif pd.Timestamp('16:01').time() <= date.time() <= pd.Timestamp('00:00').time():
-        return 'evening'
-    else:
-        return 'overnight'
-```
-
-```{python}
-# Creating functions to turn Tweet Text into categorical and numerical features
-def avg_word_length(text):
-    average = 0
-    for word in text.split() :
-        average += len(word)
-    return round(average/len(text.split()),1)
-
-def punctuation_count(text):
-    count = 0
-    for char in text:
-        if not char.isalnum() and not char.isspace():
-            count+=1
-    return count
-```
-
-```{python}
-# Adding the numerical and categorical features 
-cat_feature_tweets = tweets.reset_index()
-cat_feature_tweets['year']=cat_feature_tweets['Date & Time'].dt.year # create year feature
-cat_feature_tweets['month']=cat_feature_tweets['Date & Time'].dt.month # create month feature
-cat_feature_tweets['day']=cat_feature_tweets['Date & Time'].dt.day # create day feature
-cat_feature_tweets['season']=cat_feature_tweets['Date & Time'].apply(season) # create season feature
-cat_feature_tweets['time_of_day']=cat_feature_tweets['Date & Time'].apply(daytime) # create time of day feature
-cat_feature_tweets['avg_word_length']=cat_feature_tweets['Tweet Text'].apply(avg_word_length) # create average word length feature
-cat_feature_tweets['word_count']=cat_feature_tweets['Tweet Text'].apply(lambda x:len(x.split())) # create number of words feature
-cat_feature_tweets['punctuation_count']=cat_feature_tweets['Tweet Text'].apply(punctuation_count) # create number of punctuation feature
-cat_feature_tweets = cat_feature_tweets.drop(columns=['weak_label','Date & Time','Tweet Text', 'pos_prob','hour'])
-cat_feature_tweets
-```
-
-<b> Checking feature/feature correlation of using Deepchecks <b>
-
-```{python}
-cat_feature_ds = Dataset(cat_feature_tweets,label = 'Sentiment', cat_features=['season','time_of_day'])
-```
-
-```{python}
-check_feat_feat_corr = FeatureFeatureCorrelation().add_condition_max_number_of_pairs_above_threshold(threshold = 0.95, n_pairs = 1)
-check_feat_feat_corr_result = check_feat_feat_corr.run(dataset=cat_feature_ds)
-
-if not check_feat_feat_corr_result.passed_conditions():
-    raise ValueError("Feature-feature correlation exceeds the maximum acceptable threshold.")
-
-# ValueError works as expected
-```
 
 ## Results
 
