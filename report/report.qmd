@@ -1,16 +1,21 @@
 ---
 title: Trump Twitter Analysis
 author : Group 14-Quan Hoang, Mailys Guedon, Joel Peterson, Li Pu 
-date: Sys.Date()
+jupyter: python3
 format:
     html:
         toc: true
-        toc-depth: 2
+        toc-depth: 4
+    pdf:
+        toc: true
+        toc-depth: 4
 embed-resources: true
 bibliography: references.bib
 execute:
   echo: false
   warning: false
+editor: source
+
 
 ---
 
@@ -35,25 +40,34 @@ season_freq_increase =round((season_summary['Count'].max()-season_summary['Count
 sentiment_count = pd.read_csv('../results/tables/sentiment_counts.csv')
 positive_freq = round(sentiment_count.loc[0,'Count']/sentiment_count['Count'].sum()*100,2)
 negative_freq = round(sentiment_count.loc[2,'Count']/sentiment_count['Count'].sum()*100,2)
+neutral_freq = round(sentiment_count.loc[1,'Count']/sentiment_count['Count'].sum()*100,2)
+most_sentiment = sentiment_count.loc[sentiment_count['Count'].idxmax(),'Sentiment']
+
 ```
 
 # Summary
-In this report we will be analyzing Tweets published by Donald Trump during his first presidency, focusing on two different aspects : frequency and sentiment. We started by considering how the time of day and season affects the frequency of the tweets. Our research reveals that there is a variation in the frequency depending on time of day and that there is a `{python} time_freq_increase`% increase in the number of tweets published from the `{python} least_frequent_time` to the `{python} most_frequent_time`. We also found that changing the season also had an impact on the frequency, with there being a `{python} season_freq_increase`% increase in the number of tweets from the season where he posts the least (`{python} least_frequent_season`) to the season where he posts the most (`{python} most_frequent_season`). Additionally, we performed sentiment analysis using the VADER lexicon to determine the frequency of positive, negative and neutral tweets. We found that around `{python} positive_freq`% of the tweets were classified as positive and `{python} negative_freq`% as negative. To better understand the sentiment of the tweets we also used a combination of CountVectorizer and Logistic Regression to determine the most frequently used words in the  positive and negative tweets. We found that the positive tweets most often contained words of praise and common phrases used by Trump, as well as his own name, while the negative tweets most often used words to refer to opposing political parties and leaders. 
+In this report we will be analyzing Tweets published by Donald Trump during his first presidency, focusing on two different aspects : frequency and sentiment. We started by considering how the time of day and season affects the frequency of the tweets. Our research reveals that there is a variation in the frequency depending on time of day and that there is a `{python} time_freq_increase`% increase in the number of tweets published from the `{python} least_frequent_time` to the `{python} most_frequent_time`. We also found that changing the season also had an impact on the frequency, with there being a `{python} season_freq_increase`% increase in the number of tweets from the season where he posts the least (`{python} least_frequent_season`) to the season where he posts the most (`{python} most_frequent_season`). Additionally, we performed sentiment analysis using the VADER lexicon to classify the tweets and determine the frequency of positive, negative and neutral tweets. We found that around `{python} positive_freq`% of the tweets were classified as positive and `{python} negative_freq`% as negative. Using the positive and negative labels, we will train a Logistic Regression model to determine the most frequently used words in the positive and negative tweets. We found that the positive tweets most often contained words of praise and common phrases used by Trump, as well as his own name, while the negative tweets most often used words to refer to opposing political parties and leaders. 
 
 
 # Introduction
-Twitter (also known as X) is one of the world's most popular social media platforms, where users can share short messages (texts, videos, photos) known as tweets. In April 2025, the Pew Research Center did a study and found that on average active users published 157 tweets per month, which is around 5 tweets per day [@gottfried2025americans]. At the beginning of his first presidency, Donald Trump followed the average, posting about 5.7 times per day. However, towards the second half of 2020, his posting rate grew to around 34.8 times per day. On June 5 2020, he went as far as tweeting or retweeting 200 messages in a single day [@McCarthy_Richter_2021]. With so much data, we thought it would be interesting to consider what could affect his frequency of posting. The president uses the platform mostly to disparage those he perceives as threats (people, companies, countries...), with more than half of his tweets between January 2017 and October 2019 being used to attack something or someone [@shear2019trump]. Another interesting question to consider would be to determine the frequency of positive and negative tweets throughout his presidency. In this report, we will start by considering different factors (time of day or season) that might have an impact on the frequency of the tweets, then we will classify the tweets into positive, negative or neutral to determine the most frequent sentiment expressed in his posts.
+Twitter (also known as X) is one of the world's most popular social media platforms, where users can share short messages (texts, videos, photos) known as tweets. In April 2025, the Pew Research Center did a study and found that on average active users published 157 tweets per month, which is around 5 tweets per day [@gottfried2025americans]. At the beginning of his first presidency, Donald Trump followed the average, posting about 5.7 times per day. However, towards the second half of 2020, his posting rate grew to around 34.8 times per day. On June 5 2020, he went as far as tweeting or retweeting 200 messages in a single day [@McCarthy_Richter_2021]. With so much data, we thought it would be interesting to consider what could affect his frequency of posting. The president uses the platform mostly to disparage those he perceives as threats (people, companies, countries...), with more than half of his tweets between January 2017 and October 2019 being used to attack something or someone [@shear2019trump]. Another interesting question to consider would be to determine how many of his tweets can be considered as positive or negative, and to see which words come up more often for each category. In this report, we will start by considering different factors (time of day or season) that might have an impact on the frequency of the tweets, then we will classify the tweets into positive, negative or neutral to determine the most used words in the positive and negative tweets.
 
 The dataset we are using contains all tweets published (includes deleted tweets) published by Donald Trump during his first presidency between 20 Jan 2017 and 08 Jan 2021. It contains 5 columns (ID, Time, Tweet URL, Tweet Text) and each row represents a tweet. The dataset can be found in this repository [CompleteTrumpTweetsArchive](https://github.com/MarkHershey/CompleteTrumpTweetsArchive?tab=readme-ov-file "CompleteTrumpTweetsArchive"), in the data folder, specifically the file [realDonaldTrump_in_office.csv](https://github.com/MarkHershey/CompleteTrumpTweetsArchive/blob/master/data/realDonaldTrump_in_office.csv "realDonaldTrump_in_office.csv").
 
-# Analysis
+# Method
 
-## Part 1: Does the time of day/period of the year affect the frequency of the tweets?
+## Analysis
+
+In the first part, we will be doing a visual analysis on the variation in tweet posting frequency between different times of day (daytime, evening, overnight), then between different seasons (winter, summer, autumn, spring).
+In the second part, we will use the VADER lexicon to classify the tweets into either positive, neutral or negative categories. With the tweets now classified into positive and negative (we will consider neutral tweets as positive), we will use a bag of words approach on the tweets (CountVectorizer) to train a logistic model. We will then extract the coefficients from the model to determine the top positive and negative words.
+
+## Results
+### Part I: Does the time of day or season affect the frequency of the tweets?
 
 With the president posting 34.8 times per day [@shear2019trump] it is interesting to consider whether the time of day or even the period of the year affects the frequency of his tweets. <br>
 Before our analysis, we believed that the frequency of tweets would be highest during the daytime and night-time. These assumptions were proven wrong as the numbers show that the most frequent time of day for tweets was the `{python} most_frequent_time` period. 
 
-The initial data filtering by time of day visualized in the bar chart shows that the highest frequency of tweets occurs during the `{python} most_frequent_time` period between `{python} time_day_summary.loc[0,'Time Range']` (as mentioned above) with a total of `{python} time_day_summary['Count'].max()` analyzed tweets. The second most frequent tweet period occurred during the `{python} time_day_summary.loc[1,'Time of Day']` period between `{python} time_day_summary.loc[1,'Time Range']` with a total of `{python} time_day_summary.loc[1,'Count']` analyzed tweets, with the time of day resulting in the least frequent amount of tweets actually being the `{python} least_frequent_time` period between `{python} time_day_summary.loc[2,'Time Range']` with a total of `{python} time_day_summary['Count'].min()` analyzed tweets. Perhaps this is because Trump is most busy during the day (golfing?) and cannot tend to tweets.
+The initial data filtering by time of day shows that the highest frequency of tweets occurs during the `{python} most_frequent_time` period between `{python} time_day_summary.loc[0,'Time Range']` (as mentioned above) with a total of `{python} time_day_summary['Count'].max()` analyzed tweets. The second most frequent tweet period occurred during the `{python} time_day_summary.loc[1,'Time of Day']` period between `{python} time_day_summary.loc[1,'Time Range']` with a total of `{python} time_day_summary.loc[1,'Count']` analyzed tweets, with the time of day resulting in the least frequent amount of tweets actually being the `{python} least_frequent_time` period between `{python} time_day_summary.loc[2,'Time Range']` with a total of `{python} time_day_summary['Count'].min()` analyzed tweets. Perhaps this is because Trump is most busy during the day (golfing?) and cannot tend to tweets.
 
 
 ```{python}
@@ -72,25 +86,25 @@ The seasonal filtering of the tweets returned the results of the most frequent a
 Markdown(season_summary.to_markdown(index = False))
 ```
 
+Hence, we can see that time of day and season do affect the number of tweets posted, with the theoretical most prolific time period for posting being in `{python} most_frequent_season` during the `{python} most_frequent_time`.
 
-Creating the time of day frequency charts:
+
 
 ![Trump's Tweet Frequency by Time of Day](../results/figures/tweet_frequency_time_of_day.png){#fig-time-of-day width=70%}
 
 
 
-Creating the seasonal frequency charts:
 
 ![Trump's Tweet Frequency by Season](../results/figures/tweet_frequency_season.png){#fig-season-frequency width=70%}
 
 
-Hence, we can see that there is a variation in the frequency depending on time of day and that there is a `{python} time_freq_increase`% increase in the number of tweets published from the `{python} least_frequent_time` to the `{python} most_frequent_time`. We also found that changing the season also had an impact on the frequency, with there being a `{python} season_freq_increase`% increase in the number of tweets from the season where he posts the least (`{python} least_frequent_season`) to the season where he posts the most (`{python} most_frequent_season`). 
+Now visually comparing the two, we see that time of day has a higher impact on the frequency than season does. Indeed,  there is a `{python} time_freq_increase`% increase in the number of tweets published from the `{python} least_frequent_time` to the `{python} most_frequent_time`, while changing the season from  `{python} least_frequent_season` to `{python} most_frequent_season` only results in a `{python} season_freq_increase`% increase. 
 
+### Part II: How many tweets are positive vs negative? 
 
-### Part 2: How many tweets are positive vs negative? (2 classification methods)
-When we think of the tweets posted by the president, we tend to think mostly of those where he critices or attacks others. However, is this a real representation of the sentiments of his tweets? In this part we will use two different sentiment analysis models to determine the frequency of positive, negative and neutral tweets.
+When we think of the tweets posted by the president, we tend to think mostly of those where he critices or attacks others. However, is this a real representation of the sentiments of his tweets? In this part we will begin by classify the tweets into positive, negative or neutral, then we will use those labels to analyse the words in the tweets for the positive and negative classes.
 
-<b> Method 1:</b>  
+#### Classifying the tweets: 
 We use a simple sentiment analysis model (VADER) to classify each tweet as positive, negative, or neutral, and then compare the counts, this methodological inspiration is from ChatGPT.
 
 
@@ -101,15 +115,16 @@ Markdown(sentiment_count.to_markdown(index = False))
 ```
 
 
-Using the VADER sentiment analyzer the tweets were classified as either positive, neutral, or negative. At first, we believed that the tweets were likely more negative than positive, but in fact the tweets were classified as far more positive than negative, almost doubling the negatively classified tweets. The tweets classified as 'neutral' fall almost directly in between the tweets classified as positive and negative. The actual context and literal meaning of the tweets was not analyzed, nor the accuracy of the classification at this point, so there is certainly going to be a margin of error and some 'false positives' etc as the positivity is quite often a self directed compliment of sorts.
+Using the VADER sentiment analyzer the tweets were classified as either positive, neutral, or negative. At first, we believed that the tweets were likely more negative than positive, but in fact the tweets were classified as far more `{python} most_sentiment` than negative, with the `{python} most_sentiment` class representing `{python} positive_freq`% of the total tweets. On the other hand, the negative class only represent `{python} negative_freq`% of the total number of tweets, with the number of 'neutral' tweets close behind with `{python} neutral_freq`%. 
 
 ![Number of tweets per sentiment (positive, neutral, negative).](../results/figures/sentiment_counts.png){#fig-sentiment-dist width=50%}
 
+The actual context and literal meaning of the tweets was not analyzed, nor the accuracy of the classification at this point, so there is certainly going to be a margin of error and some 'false positives' etc as the positivity is quite often a self directed compliment of sorts.
 
-<b> Method 2:</b>   
+#### Analysing the words in each tweet
 Using a CountVectorizer and Logistic Regression, combining with a Wordcloud visualization to determine the most frequent words in the positive and negative tweets. Syntax and bug fixing credited to ChatGPT 5.1 <br>
 
-
+The second classifier method used to analyze the tweets was utilizing the CountVectorizer() to classify sets as positive words, negative words and some stop words unique to this dataset. The overall positive VS negative tweet counts are skewed in the opposite direction as the 'neutral' category here is somewhat added to the postively classified category.
 ```{python}
 #| tbl-cap: "Accuracy of the model"
 #| label: tbl-model-accuracy
@@ -117,59 +132,243 @@ model_accuracy = pd.read_csv('../results/tables/model_metrics.csv')
 Markdown(model_accuracy.to_markdown(index = False))
 ```
 
+While the model achieves a high accuracy score, it might not be a true reflection of how it would perform in the 'real' world. Indeed, this model does not consider intricacies of language (sarcasm, neutral tweets added to positive class) that can change the sentiment of the message.
 ```{python}
-#| tbl-cap: "Number of tweets per sentiment (positive vs negative)"
-#| label: tbl-sentiment-counts
-sent_count_df = tweets["Sentiment"].value_counts().to_frame(name="count")
-Markdown(sent_count_df.to_markdown())
+top_pos_words = pd.read_csv('../results/tables/top_positive_words.csv').head(4)[['word','coefficient']]
+most_pos_word = top_pos_words.loc[0,'word']
+praise_word = top_pos_words.loc[2,'word']
+maga_word = top_pos_words.loc[1,'word']
 ```
 
-```{python}
-#| tbl-cap: "Most frequent words in negative tweets"
-#| label: tbl-negative-words
-top_neg_words = pd.read_csv('../results/tables/top_negative_words.csv')
-Markdown(top_neg_words.to_markdown(index = False))
-```
-
-![Word cloud of negative tweets](../results/figures/wordcloud_negative.png){#fig-neg-wordcloud width=70%}
+The results of the most frequent words are not very surprising to anyone who has followed American news at all in the last 10 years with the positive tweets containing words of praise (`{python} most_pos_word`,`{python} praise_word`) and common phrases used by Trump (`{python} maga_word`).
 
 ```{python}
 #| tbl-cap: "Most frequent words in positive tweets"
 #| label: tbl-positive-words
-top_pos_words = pd.read_csv('../results/tables/top_negative_words.csv')
 Markdown(top_pos_words.to_markdown(index = False))
 ```
+
+```{python}
+top_neg_words = pd.read_csv('../results/tables/top_negative_words.csv').head(8)[['word','coefficient']]
+criticise_word = top_neg_words.loc[2,'word']
+criticise_word_other = top_neg_words.loc[7,'word']
+most_neg_word = top_neg_words.loc[0,'word']
+common_word = top_neg_words.loc[3,'word']
+```
+The most frequent words appearing in the negative tweets could also be somewhat assumed as they words he commonly uses to criticize the opposing political parties and leaders (`{python} criticise_word`, `{python} criticise_word_other`) as well as other common phrases and words that one would hear often in a news report of Trump lashing out over twitter or a speech (`{python} most_neg_word`, `{python} common_word`) .
+
+
+```{python}
+#| tbl-cap: "Most frequent words in negative tweets"
+#| label: tbl-negative-words
+Markdown(top_neg_words.to_markdown(index = False))
+```
+
+A great visual indicator of these word frequencies is the word clouds for the respective most frequent positive and negatively classified words. Here we can see that the words in each class make sense (it makes sense that words like bad or corrupt would be used in negative tweets while words like strong or best would be used in positive tweets). 
+
+![Word cloud of negative tweets](../results/figures/wordcloud_negative.png){#fig-neg-wordcloud width=70%}
+
+
 
 
 ![Word cloud of positive tweets](../results/figures/wordcloud_positive.png){#fig-pos-wordcloud width=70%}
 
+However, it is interesting that `{python} most_neg_word` is the most negative word since in itself it is neither positively or negatively connotated, but it is well known that Donald Trump considers news as fake and not to be trusted.
 
 
 
-The second classifier method used to analyze the tweets was utilizing the CountVectorizer() to classify sets as positive words, negative words and some stop words unique to this dataset. The overall positive VS negative tweet counts are skewed in the opposite direction as the 'neutral' category here is somewhat added to the postively classified category. The results of the most frequent words are not very surprising to anyone who has followed American news at all in the last 10 years with the positive tweets containing words of praise and common phrases used by Trump, as well as his own name. The most frequent words appearing in the negative tweets could also be somewhat assumed as they contain words of the opposing political parties and leaders as well as other common phrases and words that one would hear often in a news report of Trump lashing out over twitter or a speech. A somewhat interesting note is that the word 'Trump' appears frequently in both positive and negative classifications, but could be rationalized by the fact that Trump often speaks about himself in the third person. A great visual indicator of these word frequencies is the word clouds for the respective most frequent positive and negatively classified words. 
+```{python}
+import seaborn as sns
+import pandas as pd
+import matplotlib.pyplot as plt
+from IPython.display import Markdown 
+
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+import re
+from collections import Counter
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+
+tweets = pd.read_csv('../data/processed/trump_tweets_with_sentiment.csv', parse_dates=["Date & Time"], index_col="Date & Time")
+positive_words = set("""good great amazing fantastic tremendous strong win winning beautiful success successful
+happy proud respect love best positive incredible honored grateful huge strong strongest great big""".split())
+
+negative_words = set("""bad terrible horrible weak fail failure disaster sad angry corrupt
+worst negative unfair hate disgrace stupid dishonest democrat biden obama democrats sleepy joe illegal""".split())  # democrat, biden, obama usually associated negatively when Trump speaks
+
+stopwords = set("""the a an and of to in is it this that for on with be as by are was were will from at have has but not or if so
+you your my our their they we i he she his her him them rt s all t just now amp more very about do what who people word should m realdonaldtrump u""".split())
+
+# -------------------------------------------------------------------
+# 1. Helper functions
+# -------------------------------------------------------------------
+
+def simple_tokenize(text: str):
+    """Lowercase everything, remove URLs and non letters, then split."""
+    text = text.lower()
+    text = re.sub(r"http\S+", "", text)          # remove URLs
+    text = re.sub(r"[^a-z\s]", " ", text)        # keep letters and spaces
+    return text.split()
+
+def weak_label(text: str):
+    """Use positive and negative lexicons to create weak labels for training."""
+    if not isinstance(text, str):
+        return None
+    tokens = simple_tokenize(text)
+    pos_hits = sum(1 for w in tokens if w in positive_words)
+    neg_hits = sum(1 for w in tokens if w in negative_words)
+    if pos_hits > neg_hits:
+        return "positive"
+    elif neg_hits > pos_hits:
+        return "negative"
+    else:
+        return None  # ambiguous, skip from training
+
+# -------------------------------------------------------------------
+# 2. Create weak labels for a subset of tweets
+# -------------------------------------------------------------------
+
+tweets["weak_label"] = tweets["Tweet Text"].apply(weak_label)
+train_df = tweets.dropna(subset=["weak_label"]).copy()
 
 
+#| tbl-cap: "Number of weak-labeled tweets"
+#| label: tbl-weak-labels
+
+weak_label_df = train_df["weak_label"].value_counts().to_frame(name="count")
+Markdown(weak_label_df.to_markdown())
+
+
+
+# -------------------------------------------------------------------
+# 3. Train a simple ML model using CountVectorizer
+# -------------------------------------------------------------------
+
+X_train, X_test, y_train, y_test = train_test_split(
+    train_df["Tweet Text"],
+    train_df["weak_label"],
+    test_size=0.2,
+    random_state=42,
+    stratify=train_df["weak_label"]
+)
+
+vectorizer = CountVectorizer(stop_words=list(stopwords), min_df=3)
+X_train_vec = vectorizer.fit_transform(X_train.fillna(""))
+X_test_vec = vectorizer.transform(X_test.fillna(""))
+
+clf = LogisticRegression(max_iter=2000)
+clf.fit(X_train_vec, y_train)
+
+```
+
+### Data validation:  
 
 #### Target/response variable follows expected distribution validation: 
-For this question, since the dataset we used did not have a "target" column, we had to try using different methods in order to find the "sentiment" of the tweets (this has been discussed with Instructor Sky Sheng and she gave us the go ahead. As the graphs/values of the check for usiing CountVectorizer and Logistic Regression below suggest, we do see a skewness towards positive tweets, which can be surprising to many people. This is partly due to neutral tweets are lumped together with positive tweets. However, since this dataset is about Trump's tweets while he was in office, those tweets could be positive because he was the "powerful man" back then. 
+For this question, since the dataset we used did not have a "target" column, we had to try using different methods in order to find the "sentiment" of the tweets this has been discussed with Instructor Sky Sheng and she gave us the go ahead. As the graphs/values of the check for usiing CountVectorizer and Logistic Regression below suggest, we do see a skewness towards positive tweets, which can be surprising to many people. This is partly due to neutral tweets are lumped together with positive tweets. However, since this dataset is about Trump's tweets while he was in office, those tweets could be positive because he was the "powerful man" back then. 
+
+```{python}
+
+# -------------------------------------------------------------------
+# Data validation related to target
+# -------------------------------------------------------------------
+
+# -------------------------------------------------------------------
+# 1. Distribution of Sentiment Graph
+# -------------------------------------------------------------------
+
+#| fig-cap: "Distribution of sentiment labels"
+#| label: fig-sent-dist
+
+sns.countplot(data=tweets, x="Sentiment")
+plt.title("")
+plt.show()
 
 
-Figure 9a: Graph with the distribution of sentiment labels <br>
-Figure 9b: Proportion of sentiment labels values <br>
-Figure 9c: Graph with the distribution of sentiment labels over time <br>
+# -------------------------------------------------------------------
+# 2. Distribution of Sentiment Proportion
+# -------------------------------------------------------------------
 
-### DATA VALIDATION: Correlation 
+
+#| tbl-cap: "Proportion of sentiment labels"
+#| label: tbl-sent-proportion
+
+sent_prop_df = tweets["Sentiment"].value_counts(normalize=True).to_frame(name="proportion")
+Markdown(sent_prop_df.to_markdown())
+
+# -------------------------------------------------------------------
+# 3. Time-based Distribution of Sentiment Graph
+# -------------------------------------------------------------------
+
+#| fig-cap: "Sentiment over time (monthly)"
+#| label: fig-sent-time
+
+tweets.resample("M")["Sentiment"].value_counts().unstack().plot(kind="bar", figsize=(12,5))
+
+plt.title("")
+plt.show()
+```
+
+
+
 
 #### No anomalous correlations between target/response variable and features/explanatory variables validation: 
 For this question, again since the dataset we used did not have a "target" column, we tried our best to validate what was done. We can see that negative tweets has a higher mean length compared to positive tweets. However, there is no real correlation between time of day (even though negative tweets seem to appear slightly later in the day) or day of the week. In the wordclouds above, we do not see a clear intersection of words both appearing frequently in positive tweets and negative tweets which shows that our classification is working quite well. Last but not least, the model probability distribution graph shows that the model confidently picked up positive and negative tweets while still showing uncertainty for ambiguous cases, which is expected for a simple classifier trained on weak, lexicon-based labels. 
 
+```{python}
+# -------------------------------------------------------------------
+# Data validation related to target pt.2
+# -------------------------------------------------------------------
+
+# -------------------------------------------------------------------
+# 1. Numeric correlations
+# -------------------------------------------------------------------
+tweets["length"] = tweets["Tweet Text"].str.len()
+
+#| label: tbl-sent-length-stats
+#| tbl-cap: "Tweet length statistics by sentiment"
+
+length_stats = tweets.groupby("Sentiment")["length"].describe()
+Markdown(length_stats.to_markdown())
+
+# -------------------------------------------------------------------
+# 2. Categorical correlations (hour of day, weekday)
+# -------------------------------------------------------------------
+tweets["hour"] = tweets.index.hour
+tweets["weekday"] = tweets.index.dayofweek
+#| fig-cap: "Distribution of tweeting hour by sentiment"
+#| label: fig-sent-hour
+
+sns.boxplot(data=tweets, x="Sentiment", y="hour")
+plt.show()
+
+#| fig-cap: "Distribution of tweeting weekday by sentiment"
+#| label: fig-sent-weekday
+
+sns.boxplot(data=tweets, x="Sentiment", y="weekday")
+plt.show()
+# -------------------------------------------------------------------
+# 3. Model probability checks
+# -------------------------------------------------------------------
+#| fig-cap: "Distribution of model predicted positive probabilities"
+#| label: fig-pred-prob
+
+probs = clf.predict_proba(vectorizer.transform(tweets["Tweet Text"]))
+tweets["pos_prob"] = probs[:, 1]
+
+sns.histplot(tweets["pos_prob"])
+plt.title("Prediction Probability Distribution")
+plt.show()
+```
 
 Figure 10a: Tweet length stats according to sentiments <br>
 Figure 10b: Distribution graphs for time of day and day of the week related to sentiments <br>
 Figure 10c: Model prediction probability distribution graph <br>
 
 
-## Results
+## Discussion
 
 Within this report we considered multiple aspects of the tweets. Firstly we determined that Donald Trump's most productive time and season for posting was overnight during the summer. Then we determined that, contrary to what we originally believed, most of his tweets are actually positively connotated. Now, as mentioned above, our sentiment classification methods might not be a faithful representation of the sentiment of the tweets, as the models do not consider intricacies (sarcasm, neutral tweets added to positive class) that can change the sentiment of the message. 
 
