@@ -270,7 +270,6 @@ clf.fit(X_train_vec, y_train)
 For this question, since the dataset we used did not have a "target" column, we had to try using different methods in order to find the "sentiment" of the tweets this has been discussed with Instructor Sky Sheng and she gave us the go ahead. As the graphs/values of the check for usiing CountVectorizer and Logistic Regression below suggest, we do see a skewness towards positive tweets, which can be surprising to many people. This is partly due to neutral tweets are lumped together with positive tweets. However, since this dataset is about Trump's tweets while he was in office, those tweets could be positive because he was the "powerful man" back then. 
 
 ```{python}
-
 # -------------------------------------------------------------------
 # Data validation related to target
 # -------------------------------------------------------------------
@@ -306,7 +305,6 @@ Markdown(sent_prop_df.to_markdown())
 #| label: fig-sent-time
 
 tweets.resample("M")["Sentiment"].value_counts().unstack().plot(kind="bar", figsize=(12,5))
-
 plt.title("")
 plt.show()
 ```

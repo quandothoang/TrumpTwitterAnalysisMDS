@@ -4,9 +4,25 @@ Authors: Mailys Guedon, Quan Hoang, Joel Peterson, Li Pu
 
 ## About
 
-Here we are analyzing Tweets published by Donald Trump during his first presidency, specifically how the time of day or season affect the frequency of the tweets. Additionally, we did sentiment analysis using a VADER for classification to determine the frequency of positive, negative and neutral tweets. Finally, using a combination of CountVectorizer and Logistic Regression, we used WorldCloud visualization to determine the most frequent positive and negative words.
+In this report we will be analyzing Tweets published by Donald Trump during his first presidency, focusing on two different aspects : frequency and sentiment. 
+We started by considering how the time of day and season affects the frequency of the tweets. 
+Our research reveals that there is a variation in the frequency depending on time of day and 
+that there is a 77.14% increase in the number of tweets published from the daytime to the evening. 
+We also found that changing the season also had an impact on the frequency, with there being a 53.87% increase in the number of tweets 
+from the season where he posts the least (Winter) to the season where he posts the most (Summer). 
+Additionally, we performed sentiment analysis using the VADER lexicon to classify the tweets and determine the frequency of positive, negative and neutral tweets. 
+We found that around 51.29% of the tweets were classified as positive and 29.62% as negative. 
+Using the positive and negative labels, we will train a Logistic Regression model to determine the most frequently used words in the positive and negative tweets. 
+We found that the positive tweets most often contained words of praise and common phrases used by Trump, as well as his own name, 
+while the negative tweets most often used words to refer to opposing political parties and leaders. 
 
-The dataset we are using is a complete archive of Donald Trump's tweets (also contains deleted tweets) created by Mark Huang. For the purpose of our analysis we are only using the tweets published during his first presidency between 20 Jan 2017 and 08 Jan 2021. The dataset can be found in this repository [CompleteTrumpTweetsArchive](https://github.com/MarkHershey/CompleteTrumpTweetsArchive?tab=readme-ov-file), in the data folder, specifically the file [realDonaldTrump_in_office.csv](https://github.com/MarkHershey/CompleteTrumpTweetsArchive/blob/master/data/realDonaldTrump_in_office.csv). The dataset contains 5 columns (ID, Time, Tweet URL, Tweet Text) and each row represents a tweet.
+
+
+The dataset we are using is a complete archive of Donald Trump's tweets (also contains deleted tweets) created by Mark Huang. 
+For the purpose of our analysis we are only using the tweets published during his first presidency between 20 Jan 2017 and 08 Jan 2021.
+The dataset can be found in this repository [CompleteTrumpTweetsArchive](https://github.com/MarkHershey/CompleteTrumpTweetsArchive?tab=readme-ov-file), in the data folder, 
+specifically the file [realDonaldTrump_in_office.csv](https://github.com/MarkHershey/CompleteTrumpTweetsArchive/blob/master/data/realDonaldTrump_in_office.csv). 
+The dataset contains 5 columns (ID, Time, Tweet URL, Tweet Text) and each row represents a tweet.
 
 ## Dependencies
 
@@ -30,19 +46,25 @@ git clone https://github.com/quandothoang/TrumpTwitterAnalysisMDS.git
 
 1.  Open Docker Desktop
 
-2.  Run the following from the root of the repository to launch the container:
+2.  Run the following command from the root of the repository to launch the container:
 
 ```         
 docker compose up
 ```
 
-3.  In the terminal, towards the bottom of the output, there should be a URL that starts with `http://127.0.0.1:8888/lab?token=`. Change the port `8888` to `8787` in the URL, then copy and paste it into your browser.
+3.  In the terminal, towards the bottom of the output, there should be a URL that starts with `http://127.0.0.1:8888/lab?token=`. 
+Change the port `8888` to `8787` in the URL, then copy and paste it into your browser (the URL should now start with :`http://127.0.0.1:8787/lab?token=`).
 
-4.  To run the analysis, open `work/TrumpTweetDataAnalysis.ipynb` in Jupyter Lab and under "Run" select "Restart Kernel and run all cells".
+4.  To run the analysis, open a terminal in the notebook (the first line should look like this: `(base) jovyan@ce7534bf3379:~$`) and run the following commands: 
+```
+cd work/
+python scripts/eda.py && python scripts/sentiment_analysis.py && python scripts/wordcloud_analysis.py 
+quarto render report/report.qmd
+```
 
 ### Clean up
 
-To shut down the container, type `Ctrl` + `C` in the terminal where you launched the container, hten type `docker compose rm`.
+To shut down the container, type `Ctrl` + `C` in the terminal where you launched the container, then type `docker compose rm`.
 
 ## License
 
