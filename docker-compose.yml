@@ -1,6 +1,6 @@
 services: 
   jupyter-notebook:
-    image: quandothoang/trump-twitter-analysis:4cf31fa
+    image: quandothoang/trump-twitter-analysis:47f8c32
     ports:
       - "8787:8888"
     volumes:
