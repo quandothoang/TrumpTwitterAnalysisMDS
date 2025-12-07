@@ -106,6 +106,9 @@ To shut down the container, type `Ctrl` + `C` in the terminal where you launched
 
 The project code in the repository is licensed under the MIT license. The Trump Tweet Analysis report is licensed under Creative Commons [Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0) license](https://creativecommons.org/licenses/by-nc-nd/4.0/) Any use of the work should be properly attributed, including the link to the webpage.
 
+## Attribution
+ChatGPT was used in this project for troubleshooting and refining parts of the code.
+
 ## References
 
 Gottfried, J., Park, E., & Nolan, H. (n.d.). Americans’ Social Media Use 2025 Growing shares of U.S. adults say they are using Instagram, TikTok, WhatsApp and Reddit, but YouTube still rises to the top for media or other inquiries. Retrieved November 21, 2025, from <https://www.pewresearch.org/wp-content/uploads/sites/20/2025/11/PI_2025.11.20_Social-Media-Use_REPORT.pdf>
