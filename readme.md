@@ -58,13 +58,49 @@ Change the port `8888` to `8787` in the URL, then copy and paste it into your br
 4.  To run the analysis, open a terminal in the notebook (the first line should look like this: `(base) jovyan@ce7534bf3379:~$`) and run the following commands: 
 ```
 cd work/
-python scripts/eda.py && python scripts/sentiment_analysis.py && python scripts/wordcloud_analysis.py 
+python scripts/read_trump_tweets.py
+python scripts/preprocess_validate.py
+python scripts/eda.py
+python scripts/sentiment_analysis.py
+python scripts/wordcloud_analysis.py 
 quarto render report/report.qmd
+```
+(All arguments for the scripts are optional, for more information look at the scripts' docstrings)
+
+5. The rendered report can be found by running in the command line :
+For the pdf report:
+```
+cd report/report.pdf
+```
+or for the html report :
+```
+cd report/report.html
 ```
 
 ### Clean up
 
 To shut down the container, type `Ctrl` + `C` in the terminal where you launched the container, then type `docker compose rm`.
+
+## Developer notes
+(The developer notes section structure is taken from Tiffany Timbers' Developer Notes Readme section [breast-cancer-predictor repository](https://github.com/ttimbers/breast-cancer-predictor))
+
+### Developer dependencies
+
+- `conda` (version 23.9.0 or higher)
+- `conda-lock` (version 2.5.7 or higher)
+### Adding a new dependency
+
+- Add the dependency to the environment.yml file on a new branch.
+
+- Run conda-lock -k explicit --file environment.yml -p linux-64 to update the conda-linux-64.lock file.
+
+- Re-build the Docker image locally to ensure it builds and runs properly.
+
+- Push the changes to GitHub. A new Docker image will be built and pushed to Docker Hub automatically. It will be tagged with the SHA for the commit that changed the file.
+
+- Update the docker-compose.yml file on your branch to use the new container image (make sure to update the tag specifically).
+
+- Send a pull request to merge the changes into the main branch.
 
 ## License
 
