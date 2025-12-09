@@ -6,7 +6,7 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 
-# Test case 1
+# Test case 1 : 3 normal tweets and times
 
 test_case_1_input = pd.DataFrame({
     'Date & Time' : [pd.Timestamp(2012,12,12,12,22,14),pd.Timestamp(2012,7,14,15,26,17), pd.Timestamp(2011,3,20,1,3,5)],
@@ -37,3 +37,30 @@ test_case_1_output = pd.DataFrame({
 
 print(test_case_1_output)
 
+# Edge case 1 : empty string
+
+edge_case_1_input = pd.DataFrame({
+    'Date & Time' : [pd.Timestamp(2012,12,12,12,22,14)],
+    'Tweet Text' : ['']
+})
+print(edge_case_1_input)
+
+edge_case_1_output = pd.DataFrame({
+    'Date & Time' : [pd.Timestamp(2012,12,12,12,22,14)],
+    'Tweet Text' : [''],
+    'length':[0], 
+    'hour' : [12],
+    'weekday' : [2],
+    'year' : [2012],
+    'month' : [12],
+    'day' : [12],
+    'season' : ['autumn'],
+    'time_of_day' : ['daytime'],
+    'avg_word_length' : [0],
+    'word_count' : [0],
+    'punctuation_count' : [0]
+})
+
+print(edge_case_1_output)
+from src.data_utils import create_features
+create_features(edge_case_1_input)
