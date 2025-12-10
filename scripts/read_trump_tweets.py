@@ -49,6 +49,17 @@ def main(url, write_to):
         click.echo("Downloading data...", nl=False)
         resp = requests.get(url)
         resp.raise_for_status()
+
+        # Validate URL - Check for None, Type=str, empty str, valid HTTP endpoint
+        if url is None:
+            raise ValueError("URL cannot be None")
+        if not isinstance(url, str):
+            raise TypeError(f"URL must be a string, got {type(url).__name__}")
+        if not url.strip():
+            raise ValueError("URL cannot be empty")
+        if not url.startswith(('http://', 'https://')):
+            raise ValueError("URL must start with http:// or https://")
+            
         click.secho("...Download Complete!", fg='magenta', bold=True)
 
         # Create directory if it doesn't exist
@@ -75,6 +86,7 @@ def main(url, write_to):
     except IOError as e:
         click.secho(f"File Error: {e}", fg='red', bold=True)
         raise click.Abort()
+        
 
 
 if __name__ == "__main__":
