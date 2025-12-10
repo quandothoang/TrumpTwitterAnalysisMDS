@@ -189,6 +189,13 @@ def season(month: int):
     str
         Season: 'winter', 'spring', 'summer', or 'autumn'
 
+    Raises
+    ------
+    TypeError
+        If month is not an integer
+    ValueError
+        If month is not between 1 and 12
+
     Examples
     --------
     >>> season(1)
@@ -196,6 +203,14 @@ def season(month: int):
     >>> season(7)
     'summer'
     """
+    # Type checking
+    if not isinstance(month, int) or isinstance(month, bool):
+        raise TypeError(f"month must be an integer, got {type(month).__name__}")
+
+    # Value checking
+    if month < 1 or month > 12:
+        raise ValueError(f"month must be between 1 and 12, got {month}")
+
     if 4 <= month <= 6:
         return 'spring'
     elif 7 <= month <= 9:
@@ -204,6 +219,8 @@ def season(month: int):
         return 'autumn'
     else:
         return 'winter'
+
+
 
 
 def daytime(hour: int):
