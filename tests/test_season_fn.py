@@ -81,31 +81,31 @@ class TestSeasonErroneousCases:
     """Test erroneous/adversarial inputs for the season() function."""
 
     def test_season_raises_error_for_zero(self):
-        """Test that month 0 raises a ValueError."""
-        with pytest.raises(ValueError):
+        """Test that month 0 raises a ValueError with message."""
+        with pytest.raises(ValueError, match="month must be between 1 and 12"):
             season(0)
 
     def test_season_raises_error_for_thirteen(self):
-        """Test that month 13 raises a ValueError."""
-        with pytest.raises(ValueError):
+        """Test that month 13 raises a ValueError with message."""
+        with pytest.raises(ValueError, match="month must be between 1 and 12"):
             season(13)
 
     def test_season_raises_error_for_negative(self):
-        """Test that negative month raises a ValueError."""
-        with pytest.raises(ValueError):
+        """Test that negative month raises a ValueError with message."""
+        with pytest.raises(ValueError, match="month must be between 1 and 12"):
             season(-1)
 
     def test_season_raises_error_for_string(self):
-        """Test that string input raises a TypeError."""
-        with pytest.raises(TypeError):
+        """Test that string input raises a TypeError with message."""
+        with pytest.raises(TypeError, match="month must be an integer"):
             season("January")
 
     def test_season_raises_error_for_float(self):
-        """Test that float input raises a TypeError."""
-        with pytest.raises(TypeError):
+        """Test that float input raises a TypeError with message."""
+        with pytest.raises(TypeError, match="month must be an integer"):
             season(1.5)
 
     def test_season_raises_error_for_none(self):
-        """Test that None input raises a TypeError."""
-        with pytest.raises(TypeError):
+        """Test that None input raises a TypeError with message."""
+        with pytest.raises(TypeError, match="month must be an integer"):
             season(None)
