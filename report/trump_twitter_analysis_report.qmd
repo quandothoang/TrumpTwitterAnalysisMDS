@@ -1,15 +1,27 @@
 ---
-title: Trump Twitter Analysis
-author : Group 14-Quan Hoang, Mailys Guedon, Joel Peterson, Li Pu 
+title: "Trump Twitter Analysis"
+author: 
+  - "Group 14: Quan Hoang, Mailys Guedon, Joel Peterson, Li Pu"
 jupyter: python3
 format:
-    html:
-        toc: true
-        toc-depth: 4
-    pdf:
-        toc: true
-        toc-depth: 4
-embed-resources: true
+  html:
+    toc: true
+    toc-depth: 4
+    embed-resources: true
+  pdf:
+    toc: true
+    toc-depth: 4
+    number-sections: true
+    colorlinks: true
+    fig-pos: 'H'
+    fig-align: center
+    fig-cap-location: bottom
+    geometry:
+      - margin=1in
+    include-in-header:
+      text: |
+        \usepackage{float}
+        \usepackage[section]{placeins}
 bibliography: references.bib
 execute:
   echo: false
