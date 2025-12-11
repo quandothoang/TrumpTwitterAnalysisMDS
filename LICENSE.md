@@ -19,7 +19,8 @@ The licensor cannot revoke these freedoms as long as you follow the license term
 
 MIT License
 
-Copyright (c) 2025 Quan Hoang
+Copyright (c) 2025 
+Group Members: Mailys Guedon, Quan Hoang, Joel Peterson, Li Pu
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
