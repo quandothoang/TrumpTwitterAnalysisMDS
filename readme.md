@@ -67,7 +67,9 @@ docker compose up
 3.  In the terminal, towards the bottom of the output, there should be a URL that starts with `http://127.0.0.1:8888/lab?token=`. 
 Change the port `8888` to `8787` in the URL, then copy and paste it into your browser (the URL should now start with :`http://127.0.0.1:8787/lab?token=`).
 
-4.  To run the analysis, open a terminal in the notebook (the first line should look like this: `(base) jovyan@ce7534bf3379:~$`) and run the following commands: 
+#### Running the analysis with scripts
+
+To run the analysis, open a terminal in the notebook (the first line should look like this: `(base) jovyan@ce7534bf3379:~$`) and run the following commands: 
 ```
 cd work/
 python scripts/read_trump_tweets.py
@@ -79,7 +81,7 @@ quarto render report/trump_twitter_analysis_report.qmd
 ```
 (All arguments for the scripts are optional, for more information look at the scripts' docstrings)
 
-5. The rendered report can be found by running in the command line :
+The rendered report can be found by running in the command line :
 For the pdf report:
 ```
 cd report/trump_twitter_analysis_report.pdf
@@ -93,7 +95,7 @@ and for the quarto report :
 cd report/trump_twitter_analysis_report.qmd
 ```
 
-### Running the analysis with Make (Recommended)
+#### Running the analysis with Make (Recommended)
 
 Alternatively, you can use Make to run the entire pipeline automatically:
 ```bash
