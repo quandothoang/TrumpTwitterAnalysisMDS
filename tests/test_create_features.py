@@ -4,6 +4,7 @@ import pytest
 import pandas as pd
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+import re
 
 from src.data_utils import create_features
 
@@ -13,9 +14,9 @@ test_case_1_input = pd.DataFrame({
     'Date & Time' : [pd.Timestamp(2012,12,12,12,22,14),pd.Timestamp(2012,7,14,15,26,17), pd.Timestamp(2011,3,20,1,3,5)],
     'Tweet Text' : ['I am a concerned citizen!', 
                     'There is nothing to worry about, we have heard your complaints and decided to remove them! Be afraid...',
-                      'Il fait toujours beau au dessus des nuages. Jécouterai sous la pluie la symphonie des éclairs! Ses cris et ses larmes qui lui faisait tant///...']
+                    'Il fait toujours beau au dessus des nuages. Jécouterai sous la pluie la symphonie des éclairs! Ses cris et ses larmes qui lui faisait tant///...']
 })
-print(test_case_1_input)
+#print(test_case_1_input)
 test_case_1_output = pd.concat([test_case_1_input.copy().reset_index(), pd.DataFrame({
     'length' : [len(test_case_1_input.loc[0,'Tweet Text']), 
                 len(test_case_1_input.loc[1,'Tweet Text']),
@@ -35,20 +36,20 @@ test_case_1_output = pd.concat([test_case_1_input.copy().reset_index(), pd.DataF
 })], axis=1)
 
 
-print(test_case_1_output)
+#print(test_case_1_output)
 
-# Edge case 1 : single letter tweet
+# Edge case 1 : empty letter tweet
 
 edge_case_1_input = pd.DataFrame({
     'Date & Time' : [pd.Timestamp(2012,12,12,12,22,14)],
-    'Tweet Text' : ['I']
+    'Tweet Text' : ['']
 })
 #print(edge_case_1_input)
 
 edge_case_1_output = pd.DataFrame({
     'Date & Time' : [pd.Timestamp(2012,12,12,12,22,14)],
-    'Tweet Text' : ['I'],
-    'length':[1], 
+    'Tweet Text' : [' '],
+    'length':[0], 
     'hour' : [12],
     'weekday' : [2],
     'year' : [2012],
@@ -56,8 +57,8 @@ edge_case_1_output = pd.DataFrame({
     'day' : [12],
     'season' : ['autumn'],
     'time_of_day' : ['daytime'],
-    'avg_word_length' : [1],
-    'word_count' : [1],
+    'avg_word_length' : [0],
+    'word_count' : [0],
     'punctuation_count' : [0]
 })
 
@@ -65,7 +66,7 @@ edge_case_1_output = pd.DataFrame({
 
 edge_case_2_input = pd.DataFrame({
     'Date & Time' : [pd.Timestamp(2012,12,12,12,22,14)],
-    'Tweet Text' : ['...///...^55']
+    'Tweet Text' : ['...///...^']
 })
 #print(edge_case_2_input)
 
@@ -86,13 +87,6 @@ edge_case_1_output = pd.DataFrame({
 })
 
 
-# Error case 1 : empty string
-
-error_case_1_input = pd.DataFrame({
-    'Date & Time' : [pd.Timestamp(2012,12,12,12,22,14)],
-    'Tweet Text' : ['I am a concerned citizen!']
-})
-#print(error_case_1_input)
 
 # Error case 2 : input not dataframe
 
@@ -120,7 +114,7 @@ error_case_4_input = pd.DataFrame({
 def create_features_test_normal():
     """ Tests to ensure create_features function correctly adds features."""
     results = create_features(test_case_1_input)
-
+    print(results)
     # Verify return type 
     assert isinstance(results, pd.DataFrame)
 
@@ -128,6 +122,20 @@ def create_features_test_normal():
     pd.testing.assert_frame_equal(test_case_1_output, results, check_dtype = False)
 
 
-print(create_features_test_normal())
 
-print()
+#print(create_features_test_normal())
+
+def create_features_test_edge():
+    """ Tests to ensure create_features function works correctly when the string is empty or when there is only punctuation."""
+
+    # Test empty tweet - should return 0 for length, avg_word_length, word_count, punctuation_count
+    result_empty = create_features(edge_case_1_input)
+    assert result_empty.iloc[0, 11:].all() == 0 
+    
+    # Test punctuation tweet - should return 0 for word_count and avg_word_length
+    result_punct = create_features(edge_case_2_input)
+    assert result_punct.iloc[0, 11:13].all() == 0 
+
+create_features_test_edge()
+
+
