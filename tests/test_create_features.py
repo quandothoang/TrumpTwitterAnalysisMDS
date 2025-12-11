@@ -86,27 +86,30 @@ edge_case_1_output = pd.DataFrame({
     'punctuation_count' : [0]
 })
 
-
-
 # Error case 2 : input not dataframe
 
 error_case_2_input = {
     'Date & Time' : [pd.Timestamp(2012,12,12,12,22,14)],
-    'Tweet Text' : ['']
+    'Tweet Text' : ['I am a concerned citizen!']
 }
 #print(error_case_2_input)
 
 # Error case 3 : no Date & time or Tweet Text column
 error_case_3_input = pd.DataFrame({
-    'Date' : [pd.Timestamp(2012,12,12,12,22,14)],
+    'Date & Time' : [pd.Timestamp(2012,12,12,12,22,14)],
     'Tweet' : ['I am a concerned citizen!']
 })
 #print(error_case_3_input)
 
-# Error case 4 :  Date & time  not timestamp or tweet text not string
+# Error case 4 :  Date & time  not timestamp 
 error_case_4_input = pd.DataFrame({
-    'Date & Time'  : [pd.Timestamp(2012,12,12,12,22,14)],
+    'Date & Time'  : ['2012/12/24'],
     'Tweet Text' : ['I am a concerned citizen!']
+})
+# Error case 5 :  Date & time  not timestamp 
+error_case_5_input = pd.DataFrame({
+    'Date & Time'  : [pd.Timestamp(2012,12,12,12,22,14)],
+    'Tweet Text' : [1]
 })
 #print(error_case_4_input)
 
@@ -139,3 +142,22 @@ def create_features_test_edge():
 create_features_test_edge()
 
 
+def create_features_test_error():
+    """ Tests to ensure create_features function validates inputs correctly and raises appropriate errors."""
+    # Test 1 - input not a dataframe
+    with pytest.raises(TypeError, match="`tweets` must be a DataFrame."):
+        create_features(error_case_2_input)
+
+    # Test 2 - input has wrong column name
+    with pytest.raises(ValueError, match=f"The dataframe is missing columns."):
+        create_features(error_case_3_input)
+
+    # Test 3 - input has wrong data type in Date & time column
+    with pytest.raises(TypeError, match="`Date & Time` column must be datetime type."):
+        create_features(error_case_4_input)
+
+    # Test 4 - input has wrong data type in Tweet Text column
+    with pytest.raises(TypeError, match="`Tweet Text` column must be object type."):
+        create_features(error_case_5_input)
+
+create_features_test_error()
