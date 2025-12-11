@@ -136,6 +136,10 @@ To shut down the container, type `Ctrl` + `C` in the terminal where you launched
 
 - Send a pull request to merge the changes into the main branch.
 
+### Running the test suite
+Follow the first 3 steps in the [Running the analysis](#running-the-analysis) section above to launch Jupyter lab. 
+Tests are run using the `pytest` command in the root of the project. More details about the test suite can be found in the [`tests`](tests) directory.
+
 ## License
 
 The project code in the repository is licensed under the MIT license. The Trump Tweet Analysis report is licensed under Creative Commons [Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0) license](https://creativecommons.org/licenses/by-nc-nd/4.0/) Any use of the work should be properly attributed, including the link to the webpage.
