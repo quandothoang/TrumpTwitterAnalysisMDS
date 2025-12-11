@@ -24,11 +24,23 @@ The dataset can be found in this repository [CompleteTrumpTweetsArchive](https:/
 specifically the file [realDonaldTrump_in_office.csv](https://github.com/MarkHershey/CompleteTrumpTweetsArchive/blob/master/data/realDonaldTrump_in_office.csv). 
 The dataset contains 5 columns (ID, Time, Tweet URL, Tweet Text) and each row represents a tweet.
 
-## Dependencies
+## Summary of Findings
 
+Our analysis reveals that Trump tweeted most frequently during **evening hours** (77% more than daytime) and during **summer months**. Sentiment analysis showed that 51% of tweets were positive, with words like "great" and "MAGA" appearing frequently, while negative tweets often contained words like "fake" and "corrupt".
+
+
+## Dependencies
+See [environment.yml](environment.yml) for the complete list. Key packages include:
+- 	Python 3.11
+- 	pandas, scikit-learn, altair
+- 	vaderSentiment (for sentiment analysis)
+- 	quarto (for report rendering)
 -   [Docker](https://www.docker.com/)
 -   [VS Code](https://code.visualstudio.com/download)
 -   [VS Code Jupyter Extension](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter)
+
+**Note:** For Docker users, use `conda-linux-64.lock`. Other lock files are for different platforms.
+
 
 ## Usage
 
@@ -63,7 +75,7 @@ python scripts/preprocess_validate.py
 python scripts/eda.py
 python scripts/sentiment_analysis.py
 python scripts/wordcloud_analysis.py 
-quarto render report/report.qmd
+quarto render report/trump_twitter_analysis_report.qmd
 ```
 (All arguments for the scripts are optional, for more information look at the scripts' docstrings)
 

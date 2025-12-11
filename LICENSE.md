@@ -2,7 +2,7 @@
 
 ## Analysis report
 
-Copyright (c) 2025
+Copyright (c) 2025 Mailys Guedon, Quan Hoang, Joel Peterson, Li Pu
 
 This report (source contained in the [`TrumpTwitterAnalysisMDS` repository](https://github.com/quandothoang/TrumpTwitterAnalysisMDS)) is made available under the **Attribution-NonCommercial-ShareAlike 4.0 International** ([CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)). 
 
