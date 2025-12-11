@@ -16,6 +16,7 @@ This module provides functions to:
 import pandas as pd
 import pandera.pandas as pa
 from pandera.pandas import Column, DataFrameSchema
+import re
 
 
 def parse_raw_csv(file_path):
@@ -274,7 +275,9 @@ def avg_word_length(text: str):
     5.2
     """
     average = 0
-    for word in text.split():
+    if len(text.split()) == 0:
+        return 0
+    for word in re.sub(r"[^A-Za-z\s]", "", text).split() : # Used Chatgpt to help find the right regex expression 
         average += len(word)
     return round(average / len(text.split()), 1)
 
@@ -332,8 +335,23 @@ def create_features(tweets: pd.DataFrame):
     >>> 'season' in df.columns
     True
     """
-    tweets = tweets.reset_index().copy()
+    
+    # Input validation
+    if not isinstance(tweets, pd.DataFrame):
+        raise TypeError("`tweets` must be a DataFrame.")
+    
+    missing_columns = [col for col in ["Date & Time", "Tweet Text"] if col not in tweets.columns]
+    if missing_columns :
+        raise ValueError("The dataframe does not have the right columns.")
 
+    if tweets['Date & Time'].dtype != 'datetime64[ns]':
+        raise TypeError("`Date & Time` column must be datetime type.")
+    
+    if tweets["Tweet Text"].dtype != 'object':
+        raise TypeError("`Tweet Text` column must be object type.")    
+
+    tweets = tweets.reset_index().copy()
+  
     # Text features
     tweets["length"] = tweets["Tweet Text"].str.len()
 
@@ -350,7 +368,7 @@ def create_features(tweets: pd.DataFrame):
 
     # Additional text features
     tweets["avg_word_length"] = tweets["Tweet Text"].apply(avg_word_length)
-    tweets["word_count"] = tweets["Tweet Text"].apply(lambda x: len(x.split()))
+    tweets["word_count"] = tweets["Tweet Text"].apply(lambda x: len(re.sub(r"[^A-Za-z\s]", "", x).split()))
     tweets["punctuation_count"] = tweets["Tweet Text"].apply(punctuation_count)
 
     return tweets
