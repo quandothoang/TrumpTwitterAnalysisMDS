@@ -34,7 +34,7 @@ report/trump_twitter_analysis_report.html: report/trump_twitter_analysis_report.
 		results/tables/top_positive_words.csv \
 		results/tables/top_negative_words.csv \
 		results/tables/model_metrics.csv
-	quarto render report/trump_twitter_analysis_report.qmd --to html
+	quarto render report/trump_twitter_analysis_report.qmd --to html --execute-daemon=false
 
 report/trump_twitter_analysis_report.pdf: report/trump_twitter_analysis_report.qmd \
 		results/figures/correlation_matrix.png \
@@ -51,7 +51,8 @@ report/trump_twitter_analysis_report.pdf: report/trump_twitter_analysis_report.q
 		results/tables/top_positive_words.csv \
 		results/tables/top_negative_words.csv \
 		results/tables/model_metrics.csv
-	quarto render report/trump_twitter_analysis_report.qmd --to pdf
+	quarto render report/trump_twitter_analysis_report.qmd --to pdf --execute-daemon=false
+
 
 # ===================== WORD CLOUD ANALYSIS =====================
 results/figures/wordcloud_positive.png results/figures/wordcloud_negative.png \
