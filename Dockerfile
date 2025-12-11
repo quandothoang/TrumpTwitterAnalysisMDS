@@ -9,11 +9,15 @@ RUN conda install --quiet --yes make --file /tmp/conda-linux-64.lock \
 
 RUN python -m pip install deepchecks==0.18.1
 
-# Install TinyTeX for PDF rendering
+# Install LaTeX for PDF rendering
 USER root
-RUN wget -qO- "https://yihui.org/tinytex/install-bin-unix.sh" | sh \
-    && /root/.TinyTeX/bin/x86_64-linux/tlmgr install lmodern \
-    && mv /root/.TinyTeX /opt/TinyTeX \
-    && ln -s /opt/TinyTeX/bin/x86_64-linux/* /usr/local/bin/ \
-    && fix-permissions /opt/TinyTeX
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    lmodern \
+    texlive-latex-base \
+    texlive-latex-recommended \
+    texlive-latex-extra \
+    texlive-luatex \
+    texlive-fonts-recommended \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 USER ${NB_USER}
