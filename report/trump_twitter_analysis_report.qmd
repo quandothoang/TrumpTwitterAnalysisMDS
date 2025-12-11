@@ -124,7 +124,8 @@ The actual context and literal meaning of the tweets was not analyzed, nor the a
 ### Analysing the words in each tweet
 Using a CountVectorizer and Logistic Regression, combining with a Wordcloud visualization to determine the most frequent words in the positive and negative tweets. Syntax and bug fixing credited to ChatGPT 5.1 <br>
 
-The second classifier method used to analyze the tweets was utilizing the CountVectorizer() to classify sets as positive words, negative words and some stop words unique to this dataset. The overall positive VS negative tweet counts are skewed in the opposite direction as the 'neutral' category here is somewhat added to the postively classified category.
+The second classifier method used to analyze the tweets was utilizing the CountVectorizer() to classify sets as positive words, negative words and some stop words unique to this dataset. The overall positive VS negative tweet counts are skewed in the opposite direction as the 'neutral' category here is somewhat added to the postively classified category. This choice was made because our 
+primary goal was to identify words strongly associated with negative sentiment, and neutral tweets share more linguistic features with positive tweets than negative ones.
 ```{python}
 #| tbl-cap: "Accuracy of the model"
 #| label: tbl-model-accuracy
@@ -184,6 +185,17 @@ It is interesting to note that `{python} most_neg_word` is heavily associated wi
 
 With social media becoming more and more essential in politics, especially when engaging with the general public, it is interesting to note exactly how an inlfluential political presence (such as Donald Trump) uses this platform to spread a message. 
 Within this report we considered multiple aspects of the tweets. Firstly we determined that Donald Trump's most productive time and season for posting was `{python} most_frequent_season` during the `{python} most_frequent_time`. Then we determined that, contrary to what we originally believed, most of his tweets are actually positively connotated. Now, as mentioned above, our sentiment classification methods might not be a faithful representations of the sentiment of the tweets, as there might be hidden meanings that the bag of words approach does not pick up on. 
+
+## Limitations
+
+- VADER may not capture sarcasm, irony, or context-dependent sentiment.
+- Neutral tweets were merged with positive, which may inflate the "positive" category.
+- The logistic regression model was trained on weak labels, not manually verified sentiment.
+- Word clouds show individual word frequencies but not phrases or context.
+
+## Conclusion
+
+This analysis demonstrates that Trump's Twitter activity varied significantly by time and season, with peak activity in evenings and summer months. While most tweets were classified as positive, the sentiment analysis reveals distinct vocabulary patterns between positive and negative tweets that align with his political messaging style.
 
 
 # References
