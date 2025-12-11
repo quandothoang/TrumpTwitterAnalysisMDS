@@ -4,7 +4,7 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-from src.data_utils import score_to_label
+from src.sentiment_utils import score_to_label
 
 
 # ---------------------------
