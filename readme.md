@@ -93,6 +93,21 @@ and for the quarto report :
 cd report/trump_twitter_analysis_report.qmd
 ```
 
+### Running the analysis with Make (Recommended)
+
+Alternatively, you can use Make to run the entire pipeline automatically:
+```bash
+cd work
+make clean   # Remove all generated files
+make all     # Run the entire pipeline
+```
+
+This will execute the full analysis pipeline: download raw data → preprocess and validate → generate EDA visualizations → perform sentiment analysis → create word clouds → render the final report.
+
+To force rebuild everything (ignore existing files):
+```bash
+make -B all
+```
 
 ### Clean up
 
