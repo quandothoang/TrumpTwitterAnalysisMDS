@@ -1,12 +1,31 @@
+# author: Group 14 - Mailys Guedon, Quan Hoang, Joel Peterson, Li Pu
+# date: 2025-12-08
+
+"""
+Tests for the season() function in data_utils module.
+
+The season() function maps month numbers (1-12) to season names.
+This is a critical function used in the feature engineering pipeline
+to create the 'season' column for temporal analysis of tweet frequency.
+
+Test categories:
+1. Expected/common use cases - Normal month inputs (1-12)
+2. Edge cases - Boundary months between seasons
+3. Erroneous/adversarial use cases - Invalid inputs
+
+Run tests with: pytest tests/test_create_features.py -v
+"""
 
 import os
 import pytest
 import pandas as pd
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 import re
 
-from src.data_utils import create_features
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+
+from src.data_utils import create_features, avg_word_length, punctuation_count
 
 # ----------------------------------------------------------------------------- #
 # Normal case test data
@@ -21,23 +40,35 @@ def normal_test_case():
 })
 
 @pytest.fixture
-def normal_test_output():
-    return pd.concat([test_case_1_input.copy().reset_index(), pd.DataFrame({
-    'length' : [len(test_case_1_input.loc[0,'Tweet Text']), 
-                len(test_case_1_input.loc[1,'Tweet Text']),
-                len(test_case_1_input.loc[2,'Tweet Text'])],
-    'hour'  :  [int(test_case_1_input.loc[0,'Date & Time'].hour), 
-                int(test_case_1_input.loc[1,'Date & Time'].hour),
-                int(test_case_1_input.loc[2,'Date & Time'].hour)],
-    'weekday' : [pd.Timestamp(2012,12,12,12,22,14).weekday(),pd.Timestamp(2012,7,14,15,26,17).weekday(), pd.Timestamp(2011,3,20,1,3,5).weekday()],
-    'year' : [pd.Timestamp(2012,12,12,12,22,14).year,pd.Timestamp(2012,7,14,15,26,17).year, pd.Timestamp(2011,3,20,1,3,5).year],
-    'month' : [pd.Timestamp(2012,12,12,12,22,14).month,pd.Timestamp(2012,7,14,15,26,17).month, pd.Timestamp(2011,3,20,1,3,5).month],
-    'day' : [pd.Timestamp(2012,12,12,12,22,14).day,pd.Timestamp(2012,7,14,15,26,17).day, pd.Timestamp(2011,3,20,1,3,5).day],
-    'season' : ['autumn', 'summer', 'winter'],
-    'time_of_day' : ['daytime', 'daytime', 'overnight'],
-    'avg_word_length' : [4.2, 4.8, 4.8],
-    'word_count' : [5, len('There is nothing to worry about, we have heard your complaints and decided to remove them! Be afraid...'.split()), len('Il fait toujours beau au dessus des nuages. Jécouterai sous la pluie la symphonie des éclairs! Ses cris et ses larmes qui lui faisait tant///...'.split())],
-    'punctuation_count' : [1, 5, 8]
+def normal_test_output(normal_test_case):
+    return pd.concat([normal_test_case.copy().reset_index(), pd.DataFrame({
+    'length' : [len(normal_test_case.loc[0,'Tweet Text']), 
+                len(normal_test_case.loc[1,'Tweet Text']),
+                len(normal_test_case.loc[2,'Tweet Text'])],
+    'hour'  :  [normal_test_case.loc[0,'Date & Time'].hour, 
+                normal_test_case.loc[1,'Date & Time'].hour,
+                normal_test_case.loc[2,'Date & Time'].hour],
+    'weekday' : [normal_test_case.loc[0,'Date & Time'].weekday(),
+                 normal_test_case.loc[1,'Date & Time'].weekday(), 
+                 normal_test_case.loc[2,'Date & Time'].weekday()],
+    'year' : [normal_test_case.loc[0,'Date & Time'].year,
+              normal_test_case.loc[1,'Date & Time'].year, 
+              normal_test_case.loc[2,'Date & Time'].year],
+    'month' : [normal_test_case.loc[0,'Date & Time'].month,
+               normal_test_case.loc[1,'Date & Time'].month, 
+               normal_test_case.loc[2,'Date & Time'].month],
+    'day' : [normal_test_case.loc[0,'Date & Time'].day,
+             normal_test_case.loc[1,'Date & Time'].day, 
+             normal_test_case.loc[2,'Date & Time'].day],
+    'season' : ['autumn', 
+                'summer', 
+                'winter'],
+    'time_of_day' : ['daytime', 
+                     'daytime', 
+                     'overnight'],
+    'avg_word_length' : normal_test_case["Tweet Text"].apply(avg_word_length).tolist(),
+    'word_count' : normal_test_case["Tweet Text"].apply(lambda x: len(re.sub(r"[^A-Za-z\s]", "", x).split())).tolist(),
+    'punctuation_count' : normal_test_case["Tweet Text"].apply(punctuation_count).tolist()
 })], axis=1)
 
 
@@ -113,10 +144,10 @@ def error_case_4():
 # create_features() – normal cases                                              #
 # ----------------------------------------------------------------------------- #
 
-def create_features_test_normal(normal_test_case,normal_test_output):
+def test_create_features_normal(normal_test_case,normal_test_output):
     """ Tests to ensure create_features function correctly adds features."""
     results = create_features(normal_test_case)
-    print(results)
+
     # Verify return type 
     assert isinstance(results, pd.DataFrame)
 
@@ -129,7 +160,7 @@ def create_features_test_normal(normal_test_case,normal_test_output):
 # create_features() – edge cases                                                #
 # ----------------------------------------------------------------------------- #
 
-def create_features_test_edge(edge_case_1,edge_case_2):
+def test_create_features_edge(edge_case_1,edge_case_2):
     """ Tests to ensure create_features function works correctly when the string is empty or when there is only punctuation."""
 
     # Test empty tweet - should return 0 for length, avg_word_length, word_count, punctuation_count
@@ -145,15 +176,15 @@ def create_features_test_edge(edge_case_1,edge_case_2):
 # create_features() – error cases                                               #
 # ----------------------------------------------------------------------------- #
 
-def create_features_test_error():
+def test_create_features_error(error_case_1, error_case_2, error_case_3, error_case_4):
     """ Tests to ensure create_features function validates inputs correctly and raises appropriate errors."""
     # Test 1 - input not a dataframe
     with pytest.raises(TypeError, match="`tweets` must be a DataFrame."):
         create_features(error_case_1)
 
-    # Test 2 - input has wrong column name
-    with pytest.raises(ValueError, match=f"The dataframe is missing columns."):
-        create_features(error_case_2)
+    # Test 2 - input has wrong column name for Tweet Text
+    with pytest.raises(ValueError, match="The dataframe does not have the right columns."):
+        create_features(error_case_2,)
 
     # Test 3 - input has wrong data type in Date & time column
     with pytest.raises(TypeError, match="`Date & Time` column must be datetime type."):

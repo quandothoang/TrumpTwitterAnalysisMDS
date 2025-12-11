@@ -342,7 +342,7 @@ def create_features(tweets: pd.DataFrame):
     
     missing_columns = [col for col in ["Date & Time", "Tweet Text"] if col not in tweets.columns]
     if missing_columns :
-        raise ValueError(f"The dataframe is missing the {missing_columns} column.")
+        raise ValueError("The dataframe does not have the right columns.")
 
     if tweets['Date & Time'].dtype != 'datetime64[ns]':
         raise TypeError("`Date & Time` column must be datetime type.")
