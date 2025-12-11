@@ -82,12 +82,17 @@ quarto render report/trump_twitter_analysis_report.qmd
 5. The rendered report can be found by running in the command line :
 For the pdf report:
 ```
-cd report/report.pdf
+cd report/trump_twitter_analysis_report.pdf
 ```
 or for the html report :
 ```
-cd report/report.html
+cd report/trump_twitter_analysis_report.html
 ```
+and for the quarto report :
+```
+cd report/trump_twitter_analysis_report.qmd
+```
+
 
 ### Clean up
 

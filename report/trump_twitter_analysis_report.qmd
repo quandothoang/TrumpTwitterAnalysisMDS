@@ -117,9 +117,9 @@ Markdown(sentiment_count.to_markdown(index = False))
 
 Using the VADER sentiment analyzer the tweets were classified as either positive, neutral, or negative (@tbl-sentiment-counts). At first, we believed that the tweets were likely more negative than positive, but in fact the tweets were classified as far more `{python} most_sentiment` than negative, with the `{python} most_sentiment` class representing `{python} positive_freq`% of the total tweets. On the other hand, the negative class only represent `{python} negative_freq`% of the total number of tweets, with the number of 'neutral' tweets close behind with `{python} neutral_freq`%. 
 
-![Number of tweets per sentiment (positive, neutral, negative).](../results/figures/sentiment_counts.png){#fig-sentiment-dist width=50%}
+![Number of tweets per sentiment (positive, neutral, negative).](../results/figures/sentiment_counts.png){#fig-sentiment-dist height=50%}
 
-The actual context and literal meaning of the tweets was not analyzed, nor the accuracy of the classification at this point, so there is certainly going to be a margin of error and some 'false positives' etc as the positivity is quite often a self directed compliment of sorts.
+The actual context and literal meaning of the tweets was not analyzed, nor the accuracy of the classification at this point, so there is certainly going to be a margin of error and some 'false positives' etc as the positivity is quite often a self directed compliment of sorts. For the second method of sentiment analysis we chose to combine the neutral category with the positive category as neutral is positive in the way that it is not explicitly provocative or aggressive in manner. This will of course inflate the positive category for the next sentiment analysis but could possibly add positive words to the word cloud.
 
 ### Analysing the words in each tweet
 Using a CountVectorizer and Logistic Regression, combining with a Wordcloud visualization to determine the most frequent words in the positive and negative tweets. Syntax and bug fixing credited to ChatGPT 5.1 <br>
