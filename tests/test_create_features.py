@@ -2,16 +2,15 @@
 # date: 2025-12-08
 
 """
-Tests for the season() function in data_utils module.
+Tests for the create_features() function in data_utils module.
 
-The season() function maps month numbers (1-12) to season names.
-This is a critical function used in the feature engineering pipeline
-to create the 'season' column for temporal analysis of tweet frequency.
+The create_features() is used to feature engineer numerical and categorical features 
+from the original Date & Time and Tweet Text features.
 
 Test categories:
-1. Expected/common use cases - Normal month inputs (1-12)
-2. Edge cases - Boundary months between seasons
-3. Erroneous/adversarial use cases - Invalid inputs
+1. Normal cases - Normal dataframe input
+2. Edge cases - Empty string as tweet and tweet with only punctuation 
+3. Error cases - Invalid inputs
 
 Run tests with: pytest tests/test_create_features.py -v
 """
@@ -33,10 +32,10 @@ from src.data_utils import create_features, avg_word_length, punctuation_count
 @pytest.fixture
 def normal_test_case():
     return pd.DataFrame({
-    'Date & Time' : [pd.Timestamp(2012,12,12,12,22,14),pd.Timestamp(2012,7,14,15,26,17), pd.Timestamp(2011,3,20,1,3,5)],
-    'Tweet Text' : ['I am a concerned citizen!', 
-                    'There is nothing to worry about, we have heard your complaints and decided to remove them! Be afraid...',
-                    'Il fait toujours beau au dessus des nuages. Jécouterai sous la pluie la symphonie des éclairs! Ses cris et ses larmes qui lui faisait tant///...']
+    'Date & Time' : [pd.Timestamp(2021,1,6,18,13,14),pd.Timestamp(2014,4,5,13,14,17), pd.Timestamp(2025,8,2,1,49,5)],
+    'Tweet Text' : ['I am asking for everyone at the U.S. Capitol to remain peaceful. No violence! Remember, WE are the Party of Law & Order – respect the Law and our great men and women in Blue. Thank you!', 
+                    "RT @KLoeffler: It's lunchtime. Have you voted yet? If you haven't — GO VOTE and bring 10 people know! If you have — call your family, friends and neighbors to make sure they have too! #gapol #gasen",
+                    "I am asking all America First Patriots in Tennessee’s 7th Congressional District to please GET OUT AND VOTE for a phenomenal Candidate and MAGA Warrior, Matt Van Epps! You can win this Election for Matt, who has my Complete and Total Endorsement. HE WILL BE A GREAT CONGRESSMAN"]
 })
 
 @pytest.fixture
@@ -60,10 +59,10 @@ def normal_test_output(normal_test_case):
     'day' : [normal_test_case.loc[0,'Date & Time'].day,
              normal_test_case.loc[1,'Date & Time'].day, 
              normal_test_case.loc[2,'Date & Time'].day],
-    'season' : ['autumn', 
-                'summer', 
-                'winter'],
-    'time_of_day' : ['daytime', 
+    'season' : ['winter', 
+                'spring', 
+                'summer'],
+    'time_of_day' : ['evening', 
                      'daytime', 
                      'overnight'],
     'avg_word_length' : normal_test_case["Tweet Text"].apply(avg_word_length).tolist(),
