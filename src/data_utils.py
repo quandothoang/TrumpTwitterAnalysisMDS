@@ -277,7 +277,7 @@ def avg_word_length(text: str):
     average = 0
     if len(text.split()) == 0:
         return 0
-    for word in re.sub(r"[^A-Za-z\s]", "", text).split() :
+    for word in re.sub(r"[^A-Za-z\s]", "", text).split() : # Used Chatgpt to help find the right regex expression 
         average += len(word)
     return round(average / len(text.split()), 1)
 
@@ -335,8 +335,23 @@ def create_features(tweets: pd.DataFrame):
     >>> 'season' in df.columns
     True
     """
-    tweets = tweets.reset_index().copy()
+    
+    # Input validation
+    if not isinstance(tweets, pd.DataFrame):
+        raise TypeError("`tweets` must be a DataFrame.")
+    
+    missing_columns = [col for col in ["Date & Time", "Tweet Text"] if col not in tweets.columns]
+    if missing_columns :
+        raise ValueError(f"The dataframe is missing the {missing_columns} column.")
 
+    if tweets['Date & Time'].dtype != 'datetime64[ns]':
+        raise TypeError("`Date & Time` column must be datetime type.")
+    
+    if tweets["Tweet Text"].dtype != 'object':
+        raise TypeError("`Tweet Text` column must be object type.")    
+
+    tweets = tweets.reset_index().copy()
+  
     # Text features
     tweets["length"] = tweets["Tweet Text"].str.len()
 
