@@ -70,3 +70,23 @@ class TestScoreToLabelBoundaries:
     )
     def test_boundary_scores(self, score, expected):
         assert score_to_label(score) == expected
+
+class TestScoreToLabelExceptions:
+    """Tests for invalid inputs and thresholds."""
+
+    def test_score_out_of_range_raises(self):
+        with pytest.raises(ValueError):
+            score_to_label(2.0)
+
+    def test_score_not_numeric(self):
+        with pytest.raises(ValueError):
+            score_to_label("abc")
+
+    def test_invalid_threshold_types(self):
+        with pytest.raises(ValueError):
+            score_to_label(0.1, pos_threshold="x")
+
+    def test_invalid_threshold_order(self):
+        # neg_threshold >= pos_threshold should raise error
+        with pytest.raises(ValueError):
+            score_to_label(0.1, pos_threshold=0.05, neg_threshold=0.2)

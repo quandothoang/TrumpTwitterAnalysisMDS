@@ -46,42 +46,37 @@ out up said also even after most through first last still take where when
 """.split())
 
 
-def score_to_label(score: float, pos_threshold: float = 0.05, neg_threshold: float = -0.05) -> str:
+def score_to_label(score: float,
+                   pos_threshold: float = 0.05,
+                   neg_threshold: float = -0.05) -> str:
     """
     Convert VADER sentiment score to categorical label.
-    
-    Uses standard VADER thresholds as recommended in Hutto & Gilbert (2014).
-    
-    Parameters
-    ----------
-    score : float
-        VADER compound score (-1 to 1)
-    pos_threshold : float, default=0.05
-        Threshold above which sentiment is positive
-    neg_threshold : float, default=-0.05
-        Threshold below which sentiment is negative
-        
-    Returns
-    -------
-    str
-        'positive', 'negative', or 'neutral'
-        
-    Examples
-    --------
-    >>> score_to_label(0.5)
-    'positive'
-    >>> score_to_label(-0.3)
-    'negative'
-    >>> score_to_label(0.02)
-    'neutral'
+
+    Raises:
+        ValueError: if score is outside [-1, 1]
+        ValueError: if thresholds are invalid (neg_threshold >= pos_threshold)
     """
+
+    # --- Input validation ---
+    if not isinstance(score, (int, float)):
+        raise ValueError("Score must be a numeric value.")
+
+    if score < -1 or score > 1:
+        raise ValueError("Score must be between -1 and 1.")
+
+    if not isinstance(pos_threshold, (int, float)) or not isinstance(neg_threshold, (int, float)):
+        raise ValueError("Thresholds must be numeric values.")
+
+    if neg_threshold >= pos_threshold:
+        raise ValueError("neg_threshold must be less than pos_threshold.")
+
+    # --- Core logic ---
     if score >= pos_threshold:
         return "positive"
     elif score <= neg_threshold:
         return "negative"
     else:
         return "neutral"
-
 
 def perform_sentiment_analysis(tweets: pd.DataFrame) -> pd.DataFrame:
     """
