@@ -66,7 +66,6 @@ def main(raw_data: str, write_to: str, plot_to: str):
     print(tweets.dtypes)
 
     # Set datetime index
-    tweets = tweets.set_index("Date & Time")
     tweets = tweets.sort_index()
 
     # Create features
