@@ -15,7 +15,7 @@
 .PHONY: all clean
 
 # Top level target
-all: report/trump_twitter_analysis_report.html
+all: report/trump_twitter_analysis_report.html report/trump_twitter_analysis_report.pdf
 
 # ===================== REPORT =====================
 # Final report depends on all figures and tables
@@ -36,11 +36,24 @@ report/trump_twitter_analysis_report.html: report/trump_twitter_analysis_report.
 		results/tables/model_metrics.csv
 	quarto render report/trump_twitter_analysis_report.qmd --to html
 
+report/trump_twitter_analysis_report.pdf: report/trump_twitter_analysis_report.qmd \
+		results/figures/correlation_matrix.png \
+		results/figures/anomaly_detection.png \
+		results/figures/feature_distributions.png \
+		results/figures/tweet_frequency_time_of_day.png \
+		results/figures/tweet_frequency_season.png \
+		results/figures/sentiment_counts.png \
+		results/figures/wordcloud_positive.png \
+		results/figures/wordcloud_negative.png \
+		results/tables/time_of_day_summary.csv \
+		results/tables/season_summary.csv \
+		results/tables/sentiment_counts.csv \
+		results/tables/top_positive_words.csv \
+		results/tables/top_negative_words.csv \
+		results/tables/model_metrics.csv
+	quarto render report/trump_twitter_analysis_report.qmd --to pdf
+
 # ===================== WORD CLOUD ANALYSIS =====================
-# wordcloud_analysis.py:
-#   Input: data/processed/trump_tweets_processed.csv
-#   Output: results/figures/wordcloud_positive.png, wordcloud_negative.png
-#           results/tables/top_positive_words.csv, top_negative_words.csv, model_metrics.csv
 results/figures/wordcloud_positive.png results/figures/wordcloud_negative.png \
 results/tables/top_positive_words.csv results/tables/top_negative_words.csv \
 results/tables/model_metrics.csv: data/processed/trump_tweets_processed.csv \
@@ -53,11 +66,6 @@ results/tables/model_metrics.csv: data/processed/trump_tweets_processed.csv \
 		--table_to=results/tables
 
 # ===================== SENTIMENT ANALYSIS =====================
-# sentiment_analysis.py:
-#   Input: data/processed/trump_tweets_processed.csv
-#   Output: data/processed/trump_tweets_with_sentiment.csv
-#           results/figures/sentiment_counts.png
-#           results/tables/sentiment_counts.csv
 results/figures/sentiment_counts.png results/tables/sentiment_counts.csv \
 data/processed/trump_tweets_with_sentiment.csv: data/processed/trump_tweets_processed.csv \
 		scripts/sentiment_analysis.py
@@ -68,10 +76,6 @@ data/processed/trump_tweets_with_sentiment.csv: data/processed/trump_tweets_proc
 		--table_to=results/tables
 
 # ===================== EDA =====================
-# eda.py:
-#   Input: data/processed/trump_tweets_processed.csv
-#   Output: results/figures/tweet_frequency_time_of_day.png, tweet_frequency_season.png
-#           results/tables/time_of_day_summary.csv, season_summary.csv
 results/figures/tweet_frequency_time_of_day.png results/figures/tweet_frequency_season.png \
 results/tables/time_of_day_summary.csv results/tables/season_summary.csv: data/processed/trump_tweets_processed.csv \
 		scripts/eda.py \
@@ -82,10 +86,6 @@ results/tables/time_of_day_summary.csv results/tables/season_summary.csv: data/p
 		--table_to=results/tables
 
 # ===================== PREPROCESSING =====================
-# preprocess_validate.py:
-#   Input: data/raw/realDonaldTrump_in_office.csv
-#   Output: data/processed/trump_tweets_processed.csv
-#           results/figures/correlation_matrix.png, anomaly_detection.png, feature_distributions.png
 results/figures/correlation_matrix.png results/figures/anomaly_detection.png \
 results/figures/feature_distributions.png data/processed/trump_tweets_processed.csv: data/raw/realDonaldTrump_in_office.csv \
 		scripts/preprocess_validate.py \
@@ -96,15 +96,11 @@ results/figures/feature_distributions.png data/processed/trump_tweets_processed.
 		--plot_to=results/figures
 
 # ===================== DATA DOWNLOAD =====================
-# read_trump_tweets.py:
-#   Input: URL (hardcoded)
-#   Output: data/raw/realDonaldTrump_in_office.csv
 data/raw/realDonaldTrump_in_office.csv: scripts/read_trump_tweets.py
 	python scripts/read_trump_tweets.py \
 		--write_to=data/raw/realDonaldTrump_in_office.csv
 
 # ===================== CLEAN =====================
-# Remove all generated files
 clean:
 	rm -f data/raw/realDonaldTrump_in_office.csv
 	rm -f data/processed/trump_tweets_processed.csv
